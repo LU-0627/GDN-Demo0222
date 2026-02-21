@@ -16,6 +16,22 @@ Code implementation for : [Graph Neural Network-Based Anomaly Detection in Multi
     bash install.sh
 ```
 
+### Conda environment for TopoFuSAGNet (recommended)
+```
+    conda env create -f environment.topofusagnet.yml
+    conda activate gdn-topofusagnet
+```
+
+Windows (PowerShell) one-command setup + sanity run:
+```
+    .\run_topofusagnet.ps1
+```
+
+Quick sanity run:
+```
+    python models/topofusagnet.py
+```
+
 ### Quick Start
 Run to check if the environment is ready
 ```

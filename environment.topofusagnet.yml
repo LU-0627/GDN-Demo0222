@@ -1,0 +1,17 @@
+name: gdn-topofusagnet
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pytorch>=2.1
+  - cpuonly
+  - numpy
+  - pandas
+  - matplotlib
+  - scikit-learn
+  - scipy
+  - pip
+  - pip:
+      - tqdm
