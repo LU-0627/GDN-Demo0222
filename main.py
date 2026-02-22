@@ -143,7 +143,7 @@ class Main:
                 logger=self.logger,
             )
 
-        self.model.load_state_dict(torch.load(model_save_path, map_location=self.device, weights_only=True), strict=False)
+        self.model.load_state_dict(torch.load(model_save_path, map_location=self.device), strict=False)
         self.model.to(self.device)
         self.model.eval()
 
