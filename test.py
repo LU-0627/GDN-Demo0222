@@ -70,7 +70,12 @@ def get_val_stats(val_err_matrix):
     """【修复点2】：计算每个传感器的 Median 和 IQR (鲁棒量纲统一)"""
     median = np.median(val_err_matrix, axis=0) # [N_nodes]
     iqr_val = iqr(val_err_matrix, axis=0)      # [N_nodes]
-    iqr_val = np.where(iqr_val == 0, 1e-4, iqr_val) # 防除零
+    
+    # 【致命坑修复】：因为 main.py 已经改用 MinMaxScaler 将数据压到了 [0, 1] 之间
+    # 最大的误差也不过是 1.0 左右。所以这里的 IQR 托底值必须降到 0.01。
+    # 如果还用 0.1，会把很多真实的微小异常直接抹平；如果用 1e-4，又会导致 0 方差传感器分数爆炸。
+    iqr_val = np.maximum(iqr_val, 0.01) 
+    
     return median, iqr_val
 
 def normalize_and_score(err_matrix, median, iqr_val):

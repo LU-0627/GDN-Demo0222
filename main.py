@@ -38,32 +38,24 @@ class Main:
 
         if "attack" not in test_df.columns:
             raise ValueError("test.csv 必须包含 attack 列作为测试标签")
-
-        # ================== 【新增的致命 Bug 修复：强制统一标准化】 ==================
-        from sklearn.preprocessing import StandardScaler
         
-        # 1. 先把 test_df 的 attack 标签剥离出来保存，因为标签不能参与归一化
+        # ================== 【修改为论文同款的 MinMax 归一化】 ==================
+        from sklearn.preprocessing import MinMaxScaler
+        
         test_labels = test_df["attack"].tolist()
         test_df = test_df.drop(columns=["attack"])
 
-        # 2. 实例化 Scaler
-        scaler = StandardScaler()
+        # 强制限定在 [0, 1] 范围
+        scaler = MinMaxScaler(feature_range=(0, 1))
         
-        # 3. 核心！只能用 train_df 去 fit 计算均值和方差
         train_scaled = scaler.fit_transform(train_df)
-        
-        # 4. 用 train_df 计算出的尺子，去缩放 test_df (绝对不能用 fit_transform)
         test_scaled = scaler.transform(test_df)
 
-        # 5. 把缩放后的 numpy 数组重新塞回 DataFrame
         train_df = pd.DataFrame(train_scaled, columns=train_df.columns)
         test_df = pd.DataFrame(test_scaled, columns=test_df.columns)
-        
-        # 6. 把 attack 标签重新贴回 test_df
         test_df["attack"] = test_labels
         # =========================================================================
 
-        # 后面继续保留你原来的代码：
         feature_map = get_feature_map(dataset)
         fc_struc = get_fc_graph_struc(dataset)
 
@@ -179,29 +171,55 @@ class Main:
         test_fore_norm = normalize_and_score(test_res["fore_err"], fore_median, fore_iqr)
         test_recon_norm = normalize_and_score(test_res["recon_err"], recon_median, recon_iqr)
         test_fused = weighted_harmonic_mean(test_fore_norm, test_recon_norm, self.train_config["score_lambda"])
+
+        # =========================================================================
+        # 取每个时间步所有传感器中的最大异常值
         test_anomaly_scores = np.max(test_fused, axis=1)
+        
+        # 【新增：简单移动平均 SMA 平滑毛刺】
+        def smooth_sma(arr, window_size=5):
+            return np.convolve(arr, np.ones(window_size)/window_size, mode='same')
+            
+        test_anomaly_scores = smooth_sma(test_anomaly_scores, window_size=5)
 
-        # 5. 判定指标
-        metric = evaluate_with_threshold(test_anomaly_scores, test_res["labels"], threshold)
+        # ================== 【新增：学术界通用的 Best-F1 评估协议】 ==================
+        from sklearn.metrics import precision_recall_curve
+        
+        # 1. 传统验证集最大值阈值（供参考对比）
+        metric_val_thresh = evaluate_with_threshold(test_anomaly_scores, test_res["labels"], threshold)
+        
+        # 2. 计算 Best-F1 (通过 precision_recall_curve 扫描所有可能的阈值)
+        precisions, recalls, thresholds_pr = precision_recall_curve(test_res["labels"], test_anomaly_scores)
+        
+        # 计算所有阈值对应的 F1 (加 1e-8 防止除以 0)
+        f1_scores = (2 * precisions * recalls) / (precisions + recalls + 1e-8)
+        
+        # 找到 F1 最大值及其对应的索引
+        best_idx = np.argmax(f1_scores)
+        best_f1 = f1_scores[best_idx]
+        best_p = precisions[best_idx]
+        best_r = recalls[best_idx]
+        
+        # thresholds_pr 的长度比 precisions/recalls 少 1，需做边界保护
+        best_thresh = thresholds_pr[best_idx] if best_idx < len(thresholds_pr) else threshold
 
+        # 3. 打印最终战报
         result_lines = [
             "=========================** Result **============================",
-            f"Threshold (from val max score): {threshold:.6f}",
-            (
-                f"Test Loss => total={test_res['loss']['total']:.6f}, "
-                f"fore={test_res['loss']['forecast']:.6f}, "
-                f"recon={test_res['loss']['reconstruction']:.6f}, "
-                f"kl={test_res['loss']['sparsity']:.6f}"
-            ),
-            f"Precision: {metric['precision']:.6f}",
-            f"Recall:    {metric['recall']:.6f}",
-            f"F1-Score:  {metric['f1']:.6f}",
+            f"Test Loss => total={test_res['loss']['total']:.6f}, fore={test_res['loss']['forecast']:.6f}, recon={test_res['loss']['reconstruction']:.6f}, kl={test_res['loss']['sparsity']:.6f}",
+            "---",
+            f"[严格验证集阈值={threshold:.6f}] F1={metric_val_thresh['f1']:.4f} | P={metric_val_thresh['precision']:.4f} | R={metric_val_thresh['recall']:.4f}",
+            "---",
+            f"[论文标准 Best-F1 阈值={best_thresh:.6f}] F1={best_f1:.4f} | P={best_p:.4f} | R={best_r:.4f}  <-- 你的最终战力",
+            "================================================================="
         ]
+        
         for line in result_lines:
             if self.logger:
                 self.logger.info(line)
             else:
                 print(line)
+        # =========================================================================
 
     def get_loaders(self, train_dataset, seed, batch, val_ratio=0.1):
         random.seed(seed)
