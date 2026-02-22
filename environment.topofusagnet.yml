@@ -1,12 +1,13 @@
 name: gdn-topofusagnet
 channels:
   - pytorch
+  - nvidia
   - conda-forge
   - defaults
 dependencies:
   - python=3.10
   - pytorch>=2.1
-  - cpuonly
+  - pytorch-cuda=12.1
   - numpy
   - pandas
   - matplotlib
