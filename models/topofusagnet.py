@@ -69,7 +69,7 @@ class SparseAutoencoder(nn.Module):
 
     forward shape contract:
     - Input:  node_feat [B, N, D]
-    - Output: z [B, N, Z], reconstructed_vals [B, N, W], kl_sparsity scalar
+    - Output: z [B, N, Z], reconstructed_vals [B, N, W], kl_sparsity scalar, sparsity_dev [B, N]
     """
 
     def __init__(self, in_dim: int, latent_dim: int, window_size: int, rho: float = 0.05, eps: float = 1e-6):
@@ -95,7 +95,10 @@ class SparseAutoencoder(nn.Module):
         z = self.encoder(node_feat)
         reconstructed_vals = self.decoder(z)
         kl_sparsity = self.kl_divergence(z)
-        return z, reconstructed_vals, kl_sparsity
+        activation = torch.sigmoid(z)
+        rho_target = torch.full_like(activation, self.rho)
+        sparsity_dev = torch.mean(torch.abs(activation - rho_target), dim=-1)
+        return z, reconstructed_vals, kl_sparsity, sparsity_dev
 
 
 class LinearProjection(nn.Module):
@@ -281,7 +284,7 @@ class TopoFuSAGNet(nn.Module):
     Data flow (strict order):
     [B,N,W]
       -> MSTCN -> node_feat [B,N,D]
-      -> SAE (or LinearProjection if use_sae=0) -> z [B,N,Z], reconstructed_vals [B,N,W] (or None), kl (or 0)
+    -> SAE (or LinearProjection if use_sae=0) -> z [B,N,Z], reconstructed_vals [B,N,W] (or None), kl (or 0), sparsity_dev [B,N]
       -> GraphLearning -> A [N,N], sensor_embeddings [N,E]
       -> concat(z, sensor_embeddings_broadcast) -> gat_in [B,N,Z+E]
       -> DenseGAT -> fused [B,N,H]
@@ -290,7 +293,7 @@ class TopoFuSAGNet(nn.Module):
     forward returns:
     - predicted_vals [B,N]
     - reconstructed_vals [B,N,W] (or None if use_sae=0)
-    - extra dict with z, kl_sparsity, A, sensor_embeddings
+    - extra dict with z, kl_sparsity, sparsity_dev, A, sensor_embeddings
     """
 
     def __init__(
@@ -343,11 +346,12 @@ class TopoFuSAGNet(nn.Module):
         node_feat = self.mstcn(x)
         
         if self.use_sae:
-            z, reconstructed_vals, kl_sparsity = self.sae(node_feat)
+            z, reconstructed_vals, kl_sparsity, sparsity_dev = self.sae(node_feat)
         else:
             z = self.proj(node_feat)
             reconstructed_vals = None
             kl_sparsity = torch.tensor(0.0, device=x.device, dtype=x.dtype)
+            sparsity_dev = torch.zeros((bsz, num_nodes), device=x.device, dtype=x.dtype)
 
         a, sensor_embeddings = self.graph_learning()
         e_batch = sensor_embeddings.unsqueeze(0).expand(bsz, -1, -1)
@@ -359,6 +363,7 @@ class TopoFuSAGNet(nn.Module):
         extra = {
             "z": z,
             "kl_sparsity": kl_sparsity,
+            "sparsity_dev": sparsity_dev,
             "A": a,
             "sensor_embeddings": sensor_embeddings,
         }

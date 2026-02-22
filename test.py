@@ -24,14 +24,17 @@ def weighted_harmonic_mean(fore_err: np.ndarray, recon_err: np.ndarray, score_la
     denom = score_lambda / fore_err + (1.0 - score_lambda) / recon_err
     return 1.0 / denom
 
-def get_raw_errors(model, dataloader, criterion, device, recon_target_mode="input"):
+def get_raw_errors(model, dataloader, criterion, device, recon_target_mode="input", sae_score_type="recon"):
     """
     【修正核心】：绝不跨节点做 Mean。保留 [Num_samples, Num_nodes] 形状。
-    当 use_sae=0 时，reconstructed_vals 为 None，recon_err 应为 0。
+    当 use_sae=0 时，reconstructed_vals 为 None，recon_err 与 sparsity_dev_err 应为 0。
     """
+    if sae_score_type not in {"recon", "sparsity_dev"}:
+        raise ValueError(f"Unsupported sae_score_type: {sae_score_type}. Expected recon or sparsity_dev")
+
     model.eval()
     total_meter, fore_meter, recon_meter, kl_meter, steps = 0.0, 0.0, 0.0, 0.0, 0
-    all_fore_err, all_recon_err, all_labels = [], [], []
+    all_fore_err, all_recon_err, all_sparsity_dev_err, all_labels = [], [], [], []
 
     with torch.no_grad():
         for x, y, labels, _ in dataloader:
@@ -57,17 +60,30 @@ def get_raw_errors(model, dataloader, criterion, device, recon_target_mode="inpu
             else:
                 recon_err_batch = torch.zeros_like(fore_err_batch)
 
+            if "sparsity_dev" in extra and extra["sparsity_dev"] is not None:
+                sparsity_dev_batch = extra["sparsity_dev"]
+            else:
+                sparsity_dev_batch = torch.zeros_like(fore_err_batch)
+
             all_fore_err.append(fore_err_batch.cpu().numpy())
             all_recon_err.append(recon_err_batch.cpu().numpy())
+            all_sparsity_dev_err.append(sparsity_dev_batch.cpu().numpy())
             all_labels.append(labels.cpu().numpy())
+
+    fore_err = np.concatenate(all_fore_err, axis=0)
+    recon_err = np.concatenate(all_recon_err, axis=0)
+    sparsity_dev_err = np.concatenate(all_sparsity_dev_err, axis=0)
+    sae_err = recon_err if sae_score_type == "recon" else sparsity_dev_err
 
     return {
         "loss": {
             "total": total_meter / max(1, steps), "forecast": fore_meter / max(1, steps),
             "reconstruction": recon_meter / max(1, steps), "sparsity": kl_meter / max(1, steps),
         },
-        "fore_err": np.concatenate(all_fore_err, axis=0),   # Shape: [N_samples, N_nodes]
-        "recon_err": np.concatenate(all_recon_err, axis=0), # Shape: [N_samples, N_nodes]
+        "fore_err": fore_err,                         # Shape: [N_samples, N_nodes]
+        "recon_err": recon_err,                       # Shape: [N_samples, N_nodes]
+        "sparsity_dev_err": sparsity_dev_err,         # Shape: [N_samples, N_nodes]
+        "sae_err": sae_err,                           # Selected SAE score by sae_score_type
         "labels": np.concatenate(all_labels, axis=0).astype(int)
     }
 

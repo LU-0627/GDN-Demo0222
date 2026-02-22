@@ -131,6 +131,22 @@ python main.py -dataset msl -device cuda -epoch 30 -use_sae 0 -save_path_pattern
 - `-use_sae` (int, default=1): 
   - `0`: Disable SAE, use only linear projection
   - `1`: Enable SAE (standard TopoFuSAGNet)
+- `-sae_score_type` (str, default=`recon`, choices: `recon`, `sparsity_dev`):
+  - `recon`: use reconstruction error as SAE branch score (backward-compatible)
+  - `sparsity_dev`: use latent activation deviation score, defined as mean over latent dim of `|sigmoid(z) - rho|` per sample and per node
+
+#### Why `sparsity_dev` can be more robust
+- Reconstruction error can be weak when SAE trends toward identity mapping.
+- `sparsity_dev` directly measures whether latent activations violate target sparsity `rho`, so it is less dependent on pixel/value-level reconstruction fidelity.
+
+#### Score-Type Comparison Commands
+```bash
+# (1) fusion + recon score (default)
+python main.py -dataset msl -device cuda -epoch 30 -use_sae 1 -score_lambda 0.5 -sae_score_type recon
+
+# (2) fusion + latent sparsity deviation score
+python main.py -dataset msl -device cuda -epoch 30 -use_sae 1 -score_lambda 0.5 -sae_score_type sparsity_dev
+```
 
 
 

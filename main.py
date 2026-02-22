@@ -150,9 +150,19 @@ class Main:
         # (保持原有的模型加载和 eval 不变)
         self.model.eval()
 
+        if self.logger:
+            self.logger.info(f"SAE score type: {self.train_config['sae_score_type']}")
+
 
         # 1. 提取验证集原始误差
-        val_res = get_raw_errors(self.model, self.val_dataloader, self.criterion, self.device, self.train_config["recon_target_mode"])
+        val_res = get_raw_errors(
+            self.model,
+            self.val_dataloader,
+            self.criterion,
+            self.device,
+            self.train_config["recon_target_mode"],
+            self.train_config["sae_score_type"],
+        )
         
         # 2. 核心！计算验证集每个传感器的 Median 和 IQR
         fore_median, fore_iqr = get_val_stats(val_res["fore_err"])
@@ -161,9 +171,9 @@ class Main:
         val_fore_norm = normalize_and_score(val_res["fore_err"], fore_median, fore_iqr)
         
         if self.train_config["use_sae"]:
-            recon_median, recon_iqr = get_val_stats(val_res["recon_err"])
-            val_recon_norm = normalize_and_score(val_res["recon_err"], recon_median, recon_iqr)
-            val_fused = weighted_harmonic_mean(val_fore_norm, val_recon_norm, self.train_config["score_lambda"])
+            sae_median, sae_iqr = get_val_stats(val_res["sae_err"])
+            val_sae_norm = normalize_and_score(val_res["sae_err"], sae_median, sae_iqr)
+            val_fused = weighted_harmonic_mean(val_fore_norm, val_sae_norm, self.train_config["score_lambda"])
         else:
             # Ablation: use_sae=0，只用预测误差
             val_fused = val_fore_norm
@@ -173,13 +183,20 @@ class Main:
         threshold = float(np.max(val_anomaly_scores)) # 验证集最大分数作为阈值
 
         # 4. 在测试集上走相同的流水线，必须使用验证集的 Median 和 IQR！
-        test_res = get_raw_errors(self.model, self.test_dataloader, self.criterion, self.device, self.train_config["recon_target_mode"])
+        test_res = get_raw_errors(
+            self.model,
+            self.test_dataloader,
+            self.criterion,
+            self.device,
+            self.train_config["recon_target_mode"],
+            self.train_config["sae_score_type"],
+        )
         
         test_fore_norm = normalize_and_score(test_res["fore_err"], fore_median, fore_iqr)
         
         if self.train_config["use_sae"]:
-            test_recon_norm = normalize_and_score(test_res["recon_err"], recon_median, recon_iqr)
-            test_fused = weighted_harmonic_mean(test_fore_norm, test_recon_norm, self.train_config["score_lambda"])
+            test_sae_norm = normalize_and_score(test_res["sae_err"], sae_median, sae_iqr)
+            test_fused = weighted_harmonic_mean(test_fore_norm, test_sae_norm, self.train_config["score_lambda"])
         else:
             # Ablation: use_sae=0，只用预测误差
             test_fused = test_fore_norm
@@ -218,6 +235,7 @@ class Main:
         # 3. 打印最终战报
         result_lines = [
             "=========================** Result **============================",
+            f"SAE Score Type => {self.train_config['sae_score_type']}",
             f"Test Loss => total={test_res['loss']['total']:.6f}, fore={test_res['loss']['forecast']:.6f}, recon={test_res['loss']['reconstruction']:.6f}, kl={test_res['loss']['sparsity']:.6f}",
             "---",
             f"[严格验证集阈值={threshold:.6f}] F1={metric_val_thresh['f1']:.4f} | P={metric_val_thresh['precision']:.4f} | R={metric_val_thresh['recall']:.4f}",
@@ -312,6 +330,7 @@ if __name__ == "__main__":
     parser.add_argument("-use_sae", type=int, default=1, help="whether to use SAE (1=yes, 0=no for ablation)")
 
     parser.add_argument("-score_lambda", type=float, default=0.5, help="WHM score fusion weight lambda")
+    parser.add_argument("-sae_score_type", type=str, default="recon", choices=["recon", "sparsity_dev"], help="SAE score type for fusion")
     parser.add_argument("-recon_target_mode", type=str, default="input", help="input / (future custom mode)")
     parser.add_argument("-log_interval", type=int, default=100)
 
@@ -347,6 +366,7 @@ if __name__ == "__main__":
         "beta": args.beta,
         "use_sae": args.use_sae,
         "score_lambda": args.score_lambda,
+        "sae_score_type": args.sae_score_type,
         "recon_target_mode": args.recon_target_mode,
         "log_interval": args.log_interval,
     }
