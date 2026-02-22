@@ -1,0 +1,12 @@
+[2026-02-22 05:13:45] [INFO] 日志文件路径: /root/GDN-Demo0222/logs/swat_02-22-05-13-45.log
+[2026-02-22 05:13:45] [INFO] ===== 实验开始 =====
+[2026-02-22 05:13:45] [INFO] 数据集: swat | 设备: cuda
+[2026-02-22 05:13:45] [INFO] train_config: {'batch': 64, 'epoch': 30, 'slide_win': 15, 'slide_stride': 1, 'val_ratio': 0.2, 'seed': 5, 'lr': 0.001, 'decay': 0.0, 'c': 16, 'z_dim': 12, 'emb_dim': 10, 'gat_out_dim': 32, 'gat_heads': 2, 'topk': 5, 'rho': 0.05, 'dropout': 0.1, 'lambda_forecast': 0.5, 'beta': 0.001, 'score_lambda': 1.0, 'recon_target_mode': 'input', 'log_interval': 100}
+[2026-02-22 05:13:45] [INFO] env_config: {'save_path': 'topofusagnet', 'dataset': 'swat', 'device': 'cuda', 'load_model_path': './pretrained/topofusagnet/best_02-22-04-58-52.pt'}
+[2026-02-22 05:13:58] [INFO] =========================** Result **============================
+[2026-02-22 05:13:58] [INFO] Test Loss => total=0.156609, fore=0.311478, recon=0.001677, kl=0.031560
+[2026-02-22 05:13:58] [INFO] ---
+[2026-02-22 05:13:58] [INFO] [严格验证集阈值=98.896724] F1=0.7317 | P=0.9807 | R=0.5835
+[2026-02-22 05:13:58] [INFO] ---
+[2026-02-22 05:13:58] [INFO] [论文标准 Best-F1 阈值=95.335141] F1=0.7722 | P=0.9804 | R=0.6369  <-- 你的最终战力
+[2026-02-22 05:13:58] [INFO] =================================================================
