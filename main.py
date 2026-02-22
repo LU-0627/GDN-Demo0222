@@ -143,9 +143,20 @@ class Main:
                 logger=self.logger,
             )
 
-        self.model.load_state_dict(torch.load(model_save_path, map_location=self.device), strict=False)
+        incompatible = self.model.load_state_dict(torch.load(model_save_path, map_location=self.device), strict=False)
         self.model.to(self.device)
         self.model.eval()
+
+        missing_keys = list(getattr(incompatible, "missing_keys", []))
+        unexpected_keys = list(getattr(incompatible, "unexpected_keys", []))
+        if self.logger:
+            self.logger.info(f"Checkpoint missing_keys: {missing_keys}")
+            self.logger.info(f"Checkpoint unexpected_keys: {unexpected_keys}")
+            if missing_keys:
+                self.logger.warning(
+                    "[Strong Warning] Detected missing_keys when loading checkpoint. "
+                    "Do not mix use_sae=0 and use_sae=1 checkpoints."
+                )
 
         # (保持原有的模型加载和 eval 不变)
         self.model.eval()
@@ -176,6 +187,8 @@ class Main:
             val_fused = weighted_harmonic_mean(val_fore_norm, val_sae_norm, self.train_config["score_lambda"])
         else:
             # Ablation: use_sae=0，只用预测误差
+            if self.logger:
+                self.logger.info("Fusion disabled because use_sae=0")
             val_fused = val_fore_norm
         
         # 【修复点3】：取每个时间步里，所有传感器中“最异常”的那个值作为该时间步的整体分数
