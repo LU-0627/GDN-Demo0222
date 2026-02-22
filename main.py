@@ -126,7 +126,7 @@ class Main:
         model_save_path = (
             self.env_config["load_model_path"]
             if len(self.env_config["load_model_path"]) > 0
-            else self.get_save_path()[0]
+            else self.get_save_path()
         )
 
         if len(self.env_config["load_model_path"]) == 0:
@@ -294,32 +294,23 @@ class Main:
 
         return train_dataloader, val_dataloader
 
-    def get_save_path(self):
-        dir_path = self.env_config["save_path"]
-
+    def get_save_path(self) -> str:
+        """生成本次运行目录并返回模型保存路径"""
         if self.datestr is None:
             if self.timezone:
                 from pytz import timezone
                 try:
                     tz = timezone(self.timezone)
                     now = datetime.now(tz=tz)
-                except:
+                except Exception:
                     now = datetime.now()
             else:
                 now = datetime.now()
             self.datestr = now.strftime("%m-%d-%H-%M-%S")
-        datestr = self.datestr
 
-        paths = [
-            f"./pretrained/{dir_path}/best_{datestr}.pt",
-            f"./results/{dir_path}/{datestr}.csv",
-        ]
-
-        for path in paths:
-            dirname = os.path.dirname(path)
-            Path(dirname).mkdir(parents=True, exist_ok=True)
-
-        return paths
+        run_dir = f"./runs/{self.env_config['dataset']}_{self.datestr}"
+        Path(run_dir).mkdir(parents=True, exist_ok=True)
+        return f"{run_dir}/best.pt"
 
 
 if __name__ == "__main__":
@@ -328,7 +319,6 @@ if __name__ == "__main__":
     parser.add_argument("-dataset", type=str, default="msl", help="dataset folder name under ./data")
     parser.add_argument("-device", type=str, default="cpu", help="cpu / cuda")
     parser.add_argument("-load_model_path", type=str, default="", help="load pre-trained checkpoint path")
-    parser.add_argument("-save_path_pattern", type=str, default="topofusagnet", help="save path sub-folder")
 
     parser.add_argument("-batch", type=int, default=64)
     parser.add_argument("-epoch", type=int, default=30)
@@ -421,7 +411,6 @@ if __name__ == "__main__":
     }
 
     env_config = {
-        "save_path": args.save_path_pattern,
         "dataset": args.dataset,
         "device": args.device,
         "load_model_path": args.load_model_path,
@@ -430,9 +419,9 @@ if __name__ == "__main__":
     main_instance = Main(train_config, env_config, timezone=args.timezone)
 
     # 初始化 logger（需要 datestr，创建 Main 后再生成）
-    main_instance.get_save_path()  # 触发 datestr 初始化
-    run_name = f"{args.dataset}_{main_instance.datestr}"
-    logger = setup_logger(log_dir="logs", run_name=run_name, tz_name=args.timezone)
+    main_instance.get_save_path()  # 触发 datestr 初始化，并创建 run_dir
+    run_dir = f"./runs/{args.dataset}_{main_instance.datestr}"
+    logger = setup_logger(log_dir=run_dir, run_name="train", tz_name=args.timezone)
     main_instance.logger = logger
 
     # 记录完整运行参数
