@@ -120,42 +120,46 @@ class Main:
         self.model.to(self.device)
         self.model.eval()
 
-        # ===== 关键注释：验证集阈值 =====
-        # 使用改造后的融合分数，在验证集上取最大值作为 threshold
-        val_eval = evaluate_loop(
-            model=self.model,
-            dataloader=self.val_dataloader,
-            criterion=self.criterion,
-            device=self.device,
-            score_lambda=self.train_config["score_lambda"],
-            recon_target_mode=self.train_config["recon_target_mode"],
-        )
-        threshold = get_threshold_from_validation(val_eval["anomaly_score"])
+        # (保持原有的模型加载和 eval 不变)
+        self.model.eval()
 
-        # ===== 关键注释：测试集判定 =====
-        # 最终融合异常分数 > threshold => 异常(1)
-        test_eval = evaluate_loop(
-            model=self.model,
-            dataloader=self.test_dataloader,
-            criterion=self.criterion,
-            device=self.device,
-            score_lambda=self.train_config["score_lambda"],
-            recon_target_mode=self.train_config["recon_target_mode"],
-        )
+        from test import (get_raw_errors, get_val_stats, normalize_and_score, 
+                          weighted_harmonic_mean, evaluate_with_threshold)
 
-        metric = evaluate_with_threshold(
-            test_scores=test_eval["anomaly_score"],
-            test_labels=test_eval["labels"],
-            threshold=threshold,
-        )
+        # 1. 提取验证集原始误差
+        val_res = get_raw_errors(self.model, self.val_dataloader, self.criterion, self.device, self.train_config["recon_target_mode"])
+        
+        # 2. 核心！计算验证集每个传感器的 Median 和 IQR
+        fore_median, fore_iqr = get_val_stats(val_res["fore_err"])
+        recon_median, recon_iqr = get_val_stats(val_res["recon_err"])
+
+        # 3. 对验证集自身进行标准化并融合
+        val_fore_norm = normalize_and_score(val_res["fore_err"], fore_median, fore_iqr)
+        val_recon_norm = normalize_and_score(val_res["recon_err"], recon_median, recon_iqr)
+        val_fused = weighted_harmonic_mean(val_fore_norm, val_recon_norm, self.train_config["score_lambda"])
+        
+        # 【修复点3】：取每个时间步里，所有传感器中“最异常”的那个值作为该时间步的整体分数
+        val_anomaly_scores = np.max(val_fused, axis=1) 
+        threshold = float(np.max(val_anomaly_scores)) # 验证集最大分数作为阈值
+
+        # 4. 在测试集上走相同的流水线，必须使用验证集的 Median 和 IQR！
+        test_res = get_raw_errors(self.model, self.test_dataloader, self.criterion, self.device, self.train_config["recon_target_mode"])
+        
+        test_fore_norm = normalize_and_score(test_res["fore_err"], fore_median, fore_iqr)
+        test_recon_norm = normalize_and_score(test_res["recon_err"], recon_median, recon_iqr)
+        test_fused = weighted_harmonic_mean(test_fore_norm, test_recon_norm, self.train_config["score_lambda"])
+        test_anomaly_scores = np.max(test_fused, axis=1)
+
+        # 5. 判定指标
+        metric = evaluate_with_threshold(test_anomaly_scores, test_res["labels"], threshold)
 
         print("=========================** Result **============================")
         print(f"Threshold (from val max score): {threshold:.6f}")
         print(
-            f"Test Loss => total={test_eval['loss']['total']:.6f}, "
-            f"fore={test_eval['loss']['forecast']:.6f}, "
-            f"recon={test_eval['loss']['reconstruction']:.6f}, "
-            f"kl={test_eval['loss']['sparsity']:.6f}"
+            f"Test Loss => total={test_res['loss']['total']:.6f}, "
+            f"fore={test_res['loss']['forecast']:.6f}, "
+            f"recon={test_res['loss']['reconstruction']:.6f}, "
+            f"kl={test_res['loss']['sparsity']:.6f}"
         )
         print(f"Precision: {metric['precision']:.6f}")
         print(f"Recall:    {metric['recall']:.6f}")
