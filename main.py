@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader, Subset
 
 from datasets.TimeDataset import TimeDataset
 from models.topofusagnet import TopoFuSAGNet, JointLoss
-from test import get_raw_errors, get_val_stats, normalize_and_score, weighted_harmonic_mean, evaluate_with_threshold
+from test import get_raw_errors, get_val_stats, normalize_and_score, weighted_harmonic_mean, evaluate_with_threshold, log_sparsity_fore_stats
 from train import train
 from util.env import get_device, set_device
 from util.logger import setup_logger
@@ -207,6 +207,9 @@ class Main:
             self.train_config["recon_target_mode"],
             self.train_config["sae_score_type"],
         )
+
+        if self.train_config["sae_score_type"] == "sparsity_dev":
+            log_sparsity_fore_stats(self.logger, test_res["fore_err"], test_res["sparsity_dev_err"])
         
         test_fore_norm = normalize_and_score(test_res["fore_err"], fore_median, fore_iqr)
         

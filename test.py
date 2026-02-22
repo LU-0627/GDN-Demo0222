@@ -123,3 +123,26 @@ def evaluate_with_threshold(test_scores, test_labels, threshold):
         "recall": float(recall_score(test_labels, pred_labels, zero_division=0)),
         "f1": float(f1_score(test_labels, pred_labels, zero_division=0)),
     }
+
+
+def log_sparsity_fore_stats(logger, fore_err: np.ndarray, sparsity_dev_err: np.ndarray):
+    """
+    仅日志用途：打印 test 集中两路分数（按节点 max 聚合）的统计量，
+    用于检查量纲可比性与互补性，不影响任何计算流程。
+    """
+    if logger is None:
+        return
+
+    fore_score = np.max(fore_err, axis=1)
+    sparsity_score = np.max(sparsity_dev_err, axis=1)
+
+    logger.info(
+        "fore_score stats (test, max over nodes): "
+        f"min={np.min(fore_score):.6f}, median={np.median(fore_score):.6f}, "
+        f"p95={np.percentile(fore_score, 95):.6f}, max={np.max(fore_score):.6f}"
+    )
+    logger.info(
+        "sparsity_score stats (test, max over nodes): "
+        f"min={np.min(sparsity_score):.6f}, median={np.median(sparsity_score):.6f}, "
+        f"p95={np.percentile(sparsity_score, 95):.6f}, max={np.max(sparsity_score):.6f}"
+    )
