@@ -101,6 +101,7 @@ def train(
     grad_clip_norm: float = 5.0,
     recon_target_mode: str = "input",
     log_interval: int = 100,
+    logger=None,
 ):
     """
     训练主循环（按你的新要求实现）：
@@ -167,14 +168,17 @@ def train(
             steps += 1
 
             if step % log_interval == 0:
-                print(
+                msg = (
                     f"[Train][Epoch {epoch}/{epochs}][Step {step}] "
                     f"total={total_meter/steps:.6f} "
                     f"fore={fore_meter/steps:.6f} "
                     f"recon={recon_meter/steps:.6f} "
-                    f"kl={kl_meter/steps:.6f}",
-                    flush=True,
+                    f"kl={kl_meter/steps:.6f}"
                 )
+                if logger:
+                    logger.info(msg)
+                else:
+                    print(msg, flush=True)
 
         train_epoch_stats = {
             "total": total_meter / max(steps, 1),
@@ -195,30 +199,50 @@ def train(
             if val_epoch_stats["total"] < best_val_total:
                 best_val_total = val_epoch_stats["total"]
                 torch.save(model.state_dict(), save_path)
+                save_msg = f"最佳模型已保存: {save_path} (val_total={best_val_total:.6f})"
+                if logger:
+                    logger.info(save_msg)
+                else:
+                    print(save_msg, flush=True)
 
-            print(
+            epoch_msg = (
                 f"[Epoch {epoch}/{epochs}] "
                 f"Train(total={train_epoch_stats['total']:.6f}, fore={train_epoch_stats['forecast']:.6f}, "
                 f"recon={train_epoch_stats['reconstruction']:.6f}, kl={train_epoch_stats['sparsity']:.6f}) | "
                 f"Val(total={val_epoch_stats['total']:.6f}, fore={val_epoch_stats['forecast']:.6f}, "
-                f"recon={val_epoch_stats['reconstruction']:.6f}, kl={val_epoch_stats['sparsity']:.6f})",
-                flush=True,
+                f"recon={val_epoch_stats['reconstruction']:.6f}, kl={val_epoch_stats['sparsity']:.6f})"
             )
+            if logger:
+                logger.info(epoch_msg)
+            else:
+                print(epoch_msg, flush=True)
 
             history["val"].append(val_epoch_stats)
         else:
             if train_epoch_stats["total"] < best_val_total:
                 best_val_total = train_epoch_stats["total"]
                 torch.save(model.state_dict(), save_path)
+                save_msg = f"最佳模型已保存: {save_path} (train_total={best_val_total:.6f})"
+                if logger:
+                    logger.info(save_msg)
+                else:
+                    print(save_msg, flush=True)
 
-            print(
+            epoch_msg = (
                 f"[Epoch {epoch}/{epochs}] "
                 f"Train(total={train_epoch_stats['total']:.6f}, fore={train_epoch_stats['forecast']:.6f}, "
-                f"recon={train_epoch_stats['reconstruction']:.6f}, kl={train_epoch_stats['sparsity']:.6f})",
-                flush=True,
+                f"recon={train_epoch_stats['reconstruction']:.6f}, kl={train_epoch_stats['sparsity']:.6f})"
             )
+            if logger:
+                logger.info(epoch_msg)
+            else:
+                print(epoch_msg, flush=True)
 
         history["train"].append(train_epoch_stats)
 
-    print(f"Training finished in {(time.time() - start_time):.2f}s", flush=True)
+    finish_msg = f"训练完成，共耗时 {(time.time() - start_time):.2f}s"
+    if logger:
+        logger.info(finish_msg)
+    else:
+        print(finish_msg, flush=True)
     return history

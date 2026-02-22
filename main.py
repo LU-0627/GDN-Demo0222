@@ -15,15 +15,17 @@ from models.topofusagnet import TopoFuSAGNet, JointLoss
 from test import get_raw_errors, get_val_stats, normalize_and_score, weighted_harmonic_mean, evaluate_with_threshold
 from train import train
 from util.env import get_device, set_device
+from util.logger import setup_logger
 from util.net_struct import get_feature_map, get_fc_graph_struc
 from util.preprocess import build_loc_net, construct_data
 
 
 class Main:
-    def __init__(self, train_config, env_config):
+    def __init__(self, train_config, env_config, logger=None):
         self.train_config = train_config
         self.env_config = env_config
         self.datestr = None
+        self.logger = logger
 
         dataset = self.env_config["dataset"]
         train_orig = pd.read_csv(f"./data/{dataset}/train.csv", sep=",", index_col=0)
@@ -37,6 +39,31 @@ class Main:
         if "attack" not in test_df.columns:
             raise ValueError("test.csv 必须包含 attack 列作为测试标签")
 
+        # ================== 【新增的致命 Bug 修复：强制统一标准化】 ==================
+        from sklearn.preprocessing import StandardScaler
+        
+        # 1. 先把 test_df 的 attack 标签剥离出来保存，因为标签不能参与归一化
+        test_labels = test_df["attack"].tolist()
+        test_df = test_df.drop(columns=["attack"])
+
+        # 2. 实例化 Scaler
+        scaler = StandardScaler()
+        
+        # 3. 核心！只能用 train_df 去 fit 计算均值和方差
+        train_scaled = scaler.fit_transform(train_df)
+        
+        # 4. 用 train_df 计算出的尺子，去缩放 test_df (绝对不能用 fit_transform)
+        test_scaled = scaler.transform(test_df)
+
+        # 5. 把缩放后的 numpy 数组重新塞回 DataFrame
+        train_df = pd.DataFrame(train_scaled, columns=train_df.columns)
+        test_df = pd.DataFrame(test_scaled, columns=test_df.columns)
+        
+        # 6. 把 attack 标签重新贴回 test_df
+        test_df["attack"] = test_labels
+        # =========================================================================
+
+        # 后面继续保留你原来的代码：
         feature_map = get_feature_map(dataset)
         fc_struc = get_fc_graph_struc(dataset)
 
@@ -94,6 +121,11 @@ class Main:
             weight_decay=train_config["decay"],
         )
 
+        # 记录模型参数量
+        num_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        if self.logger:
+            self.logger.info(f"模型参数量: {num_params:,}")
+
     def run(self):
         model_save_path = (
             self.env_config["load_model_path"]
@@ -114,6 +146,7 @@ class Main:
                 grad_clip_norm=5.0,
                 recon_target_mode=self.train_config["recon_target_mode"],
                 log_interval=self.train_config["log_interval"],
+                logger=self.logger,
             )
 
         self.model.load_state_dict(torch.load(model_save_path, map_location=self.device, weights_only=True))
@@ -151,17 +184,24 @@ class Main:
         # 5. 判定指标
         metric = evaluate_with_threshold(test_anomaly_scores, test_res["labels"], threshold)
 
-        print("=========================** Result **============================")
-        print(f"Threshold (from val max score): {threshold:.6f}")
-        print(
-            f"Test Loss => total={test_res['loss']['total']:.6f}, "
-            f"fore={test_res['loss']['forecast']:.6f}, "
-            f"recon={test_res['loss']['reconstruction']:.6f}, "
-            f"kl={test_res['loss']['sparsity']:.6f}"
-        )
-        print(f"Precision: {metric['precision']:.6f}")
-        print(f"Recall:    {metric['recall']:.6f}")
-        print(f"F1-Score:  {metric['f1']:.6f}")
+        result_lines = [
+            "=========================** Result **============================",
+            f"Threshold (from val max score): {threshold:.6f}",
+            (
+                f"Test Loss => total={test_res['loss']['total']:.6f}, "
+                f"fore={test_res['loss']['forecast']:.6f}, "
+                f"recon={test_res['loss']['reconstruction']:.6f}, "
+                f"kl={test_res['loss']['sparsity']:.6f}"
+            ),
+            f"Precision: {metric['precision']:.6f}",
+            f"Recall:    {metric['recall']:.6f}",
+            f"F1-Score:  {metric['f1']:.6f}",
+        ]
+        for line in result_lines:
+            if self.logger:
+                self.logger.info(line)
+            else:
+                print(line)
 
     def get_loaders(self, train_dataset, seed, batch, val_ratio=0.1):
         random.seed(seed)
@@ -286,5 +326,18 @@ if __name__ == "__main__":
         "load_model_path": args.load_model_path,
     }
 
-    main = Main(train_config, env_config)
-    main.run()
+    main_instance = Main(train_config, env_config)
+
+    # 初始化 logger（需要 datestr，创建 Main 后再生成）
+    main_instance.get_save_path()  # 触发 datestr 初始化
+    run_name = f"{args.dataset}_{main_instance.datestr}"
+    logger = setup_logger(log_dir="logs", run_name=run_name)
+    main_instance.logger = logger
+
+    # 记录完整运行参数
+    logger.info("===== 实验开始 =====")
+    logger.info(f"数据集: {args.dataset} | 设备: {args.device}")
+    logger.info(f"train_config: { {k: v for k, v in train_config.items()} }")
+    logger.info(f"env_config: {env_config}")
+
+    main_instance.run()
