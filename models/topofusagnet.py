@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import math
 
 
 class MSTCN(nn.Module):
@@ -140,11 +141,13 @@ class GraphLearning(nn.Module):
         if not (1 <= self.topk < self.num_nodes):
             raise ValueError(f"topk must satisfy 1 <= topk < N, got topk={self.topk}, N={self.num_nodes}")
 
-        self.sensor_embeddings = nn.Parameter(torch.randn(self.num_nodes, self.embed_dim))
+        self.sensor_embeddings = nn.Parameter(torch.empty(self.num_nodes, self.embed_dim))
+        nn.init.xavier_uniform_(self.sensor_embeddings, gain=1.0)
 
     def forward(self):
         emb = F.normalize(self.sensor_embeddings, p=2, dim=-1)
         sim = emb @ emb.transpose(0, 1)
+        sim = sim / math.sqrt(self.embed_dim)
 
         # Exclude self before top-k neighbor selection, then add self-loop explicitly later.
         sim_no_self = sim.clone()

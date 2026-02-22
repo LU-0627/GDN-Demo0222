@@ -101,6 +101,7 @@ def train(
     grad_clip_norm: float = 5.0,
     recon_target_mode: str = "input",
     log_interval: int = 100,
+    graph_warmup_epochs: int = 5,
     logger=None,
 ):
     """
@@ -119,6 +120,25 @@ def train(
     start_time = time.time()
 
     for epoch in range(1, epochs + 1):
+        if hasattr(model, "graph_learning") and model.graph_learning is not None:
+            if epoch < graph_warmup_epochs:
+                for p in model.graph_learning.parameters():
+                    p.requires_grad = False
+                warmup_msg = f"Graph warmup: freeze graph_learning (epoch {epoch} < {graph_warmup_epochs})"
+                if logger:
+                    logger.info(warmup_msg)
+                else:
+                    print(warmup_msg, flush=True)
+            else:
+                for p in model.graph_learning.parameters():
+                    p.requires_grad = True
+                if epoch == graph_warmup_epochs:
+                    warmup_msg = f"Graph warmup: unfreeze graph_learning (epoch {epoch} == {graph_warmup_epochs})"
+                    if logger:
+                        logger.info(warmup_msg)
+                    else:
+                        print(warmup_msg, flush=True)
+
         model.train()
 
         total_meter = 0.0

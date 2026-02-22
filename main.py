@@ -142,6 +142,7 @@ class Main:
                 grad_clip_norm=5.0,
                 recon_target_mode=self.train_config["recon_target_mode"],
                 log_interval=self.train_config["log_interval"],
+                graph_warmup_epochs=self.train_config["graph_warmup_epochs"],
                 logger=self.logger,
             )
 
@@ -369,6 +370,7 @@ if __name__ == "__main__":
     parser.add_argument("-sae_score_type", type=str, default="recon", choices=["recon", "sparsity_dev"], help="SAE score type for fusion")
     parser.add_argument("-recon_target_mode", type=str, default="input", help="input / (future custom mode)")
     parser.add_argument("-log_interval", type=int, default=100)
+    parser.add_argument("-graph_warmup_epochs", type=int, default=5, help="freeze graph_learning for first N epochs")
     parser.add_argument("-timezone", type=str, default="Asia/Shanghai", help="时区设置，例如: Asia/Shanghai, UTC, America/New_York")
 
     args = parser.parse_args()
@@ -415,6 +417,7 @@ if __name__ == "__main__":
         "sae_score_type": args.sae_score_type,
         "recon_target_mode": args.recon_target_mode,
         "log_interval": args.log_interval,
+        "graph_warmup_epochs": args.graph_warmup_epochs,
     }
 
     env_config = {
