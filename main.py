@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader, Subset
 
 from datasets.TimeDataset import TimeDataset
 from models.topofusagnet import TopoFuSAGNet, JointLoss
-from test import evaluate_loop, get_threshold_from_validation, evaluate_with_threshold
+from test import get_raw_errors, get_val_stats, normalize_and_score, weighted_harmonic_mean, evaluate_with_threshold
 from train import train
 from util.env import get_device, set_device
 from util.net_struct import get_feature_map, get_fc_graph_struc
@@ -123,8 +123,6 @@ class Main:
         # (保持原有的模型加载和 eval 不变)
         self.model.eval()
 
-        from test import (get_raw_errors, get_val_stats, normalize_and_score, 
-                          weighted_harmonic_mean, evaluate_with_threshold)
 
         # 1. 提取验证集原始误差
         val_res = get_raw_errors(self.model, self.val_dataloader, self.criterion, self.device, self.train_config["recon_target_mode"])
