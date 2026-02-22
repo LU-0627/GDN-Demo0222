@@ -22,11 +22,12 @@ from util.preprocess import build_loc_net, construct_data
 
 
 class Main:
-    def __init__(self, train_config, env_config, logger=None):
+    def __init__(self, train_config, env_config, logger=None, timezone=None):
         self.train_config = train_config
         self.env_config = env_config
         self.datestr = None
         self.logger = logger
+        self.timezone = timezone
 
         dataset = self.env_config["dataset"]
         train_orig = pd.read_csv(f"./data/{dataset}/train.csv", sep=",", index_col=0)
@@ -296,7 +297,15 @@ class Main:
         dir_path = self.env_config["save_path"]
 
         if self.datestr is None:
-            now = datetime.now()
+            if self.timezone:
+                from pytz import timezone
+                try:
+                    tz = timezone(self.timezone)
+                    now = datetime.now(tz=tz)
+                except:
+                    now = datetime.now()
+            else:
+                now = datetime.now()
             self.datestr = now.strftime("%m-%d-%H-%M-%S")
         datestr = self.datestr
 
@@ -415,7 +424,7 @@ if __name__ == "__main__":
         "load_model_path": args.load_model_path,
     }
 
-    main_instance = Main(train_config, env_config)
+    main_instance = Main(train_config, env_config, timezone=args.timezone)
 
     # 初始化 logger（需要 datestr，创建 Main 后再生成）
     main_instance.get_save_path()  # 触发 datestr 初始化
