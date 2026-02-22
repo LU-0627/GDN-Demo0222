@@ -76,6 +76,64 @@ data
 ```
 You can change running parameters in the run.sh.
 
+### Ablation Study: SAE Removal (use_sae parameter)
+
+**Note**: The `-use_sae` parameter enables ablation study by control whether to use Sparse Autoencoder (SAE).
+
+#### Default Configuration (use_sae=1, Full TopoFuSAGNet)
+```bash
+# Full model with SAE + Forecast + Reconstruction losses
+python main.py -dataset msl -device cuda -epoch 30 -use_sae 1
+```
+- **Expected behavior**: Model trains with SAE enabled (default)
+- **Loss components**: forecast + reconstruction + sparsity
+- **Output**: All four loss terms (total, forecast, reconstruction, sparsity)
+
+#### Ablation: Disable SAE (use_sae=0)
+```bash
+# Lightweight model without SAE: only Forecast loss
+python main.py -dataset msl -device cuda -epoch 30 -use_sae 0
+```
+- **Expected behavior**: 
+  - MSTCN outputs → Linear projection (z_dim) → Graph Learning + GAT → Forecast head
+  - SAE module NOT initialized; reconstruction and sparsity losses NOT computed
+  - Only forecast loss is optimized
+- **Output**: Reconstruction and sparsity loss set to 0 in logs
+- **Log format** (consistent across modes):
+  ```
+  [Train] total=0.123456 fore=0.123456 recon=0.000000 kl=0.000000
+  [Val]   total=0.098765 fore=0.098765 recon=0.000000 kl=0.000000 (# recon & kl marked as 0)
+  ```
+
+#### Model Checkpoint Compatibility
+- **use_sae=0**: Saves with `proj` layer (Linear projection) instead of `sae`
+- **Checkpoint loading**: Uses `strict=False` to allow architecture mismatch
+  - Can load use_sae=0 checkpoint for inference in either mode (missing keys ignored)
+  - Recommended: Keep separate checkpoint directories for clean experiment tracking
+  ```bash
+  ./pretrained/topofusagnet_with_sae/     # use_sae=1 models
+  ./pretrained/topofusagnet_no_sae/       # use_sae=0 models
+  ```
+
+#### A/B Testing Commands
+```bash
+# Training with SAE (baseline)
+python main.py -dataset msl -device cuda -epoch 30 -use_sae 1 -save_path_pattern topofusagnet_with_sae
+
+# Training without SAE (ablation)
+python main.py -dataset msl -device cuda -epoch 30 -use_sae 0 -save_path_pattern topofusagnet_no_sae
+
+# Test & evaluate (model loads automatically from trained checkpoint)
+# Just re-run the same command to evaluate on test set
+```
+
+#### Key Parameter Details
+- `-use_sae` (int, default=1): 
+  - `0`: Disable SAE, use only linear projection
+  - `1`: Enable SAE (standard TopoFuSAGNet)
+
+
+
 # Others
 SWaT and WADI datasets can be requested from [iTrust](https://itrust.sutd.edu.sg/)
 

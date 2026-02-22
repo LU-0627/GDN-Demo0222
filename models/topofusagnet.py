@@ -98,6 +98,25 @@ class SparseAutoencoder(nn.Module):
         return z, reconstructed_vals, kl_sparsity
 
 
+class LinearProjection(nn.Module):
+    """
+    Linear projection layer for use_sae=0 ablation.
+    Projects MSTCN output [B, N, D] to [B, N, Z] for GCN/GAT input.
+    """
+
+    def __init__(self, in_dim: int, out_dim: int):
+        super().__init__()
+        self.proj = nn.Linear(in_dim, out_dim)
+
+    def forward(self, node_feat: torch.Tensor):
+        """
+        Input:  node_feat [B, N, D]
+        Output: z [B, N, Z]
+        """
+        z = self.proj(node_feat)
+        return z
+
+
 class GraphLearning(nn.Module):
     """
     Graph learning from trainable sensor embeddings.
@@ -212,32 +231,41 @@ class JointLoss(nn.Module):
     forward shape contract:
     - predicted_vals [B, N]
     - forecast_target [B, N]
-    - reconstructed_vals [B, N, W]
+    - reconstructed_vals [B, N, W] (or None if use_sae=0)
     - recon_target [B, N, W]
-    - kl_sparsity scalar
+    - kl_sparsity scalar (or 0 if use_sae=0)
 
     Returns:
     - dict with keys: total, forecast, reconstruction, sparsity
     """
 
-    def __init__(self, lambda_forecast: float = 0.7, beta: float = 1e-3):
+    def __init__(self, lambda_forecast: float = 0.7, beta: float = 1e-3, use_sae: int = 1):
         super().__init__()
         self.lambda_forecast = float(lambda_forecast)
         self.beta = float(beta)
+        self.use_sae = int(use_sae)
 
     def forward(
         self,
         predicted_vals: torch.Tensor,
         forecast_target: torch.Tensor,
-        reconstructed_vals: torch.Tensor,
-        recon_target: torch.Tensor,
-        kl_sparsity: torch.Tensor,
+        reconstructed_vals: torch.Tensor = None,
+        recon_target: torch.Tensor = None,
+        kl_sparsity: torch.Tensor = None,
     ):
         forecast_loss = F.mse_loss(predicted_vals, forecast_target)
-        recon_loss = F.mse_loss(reconstructed_vals, recon_target)
-        sparsity = kl_sparsity
-
-        total = self.lambda_forecast * forecast_loss + (1.0 - self.lambda_forecast) * recon_loss + self.beta * sparsity
+        
+        if self.use_sae:
+            # Normal case: compute all losses
+            recon_loss = F.mse_loss(reconstructed_vals, recon_target)
+            sparsity = kl_sparsity if kl_sparsity is not None else torch.tensor(0.0, device=predicted_vals.device)
+            total = self.lambda_forecast * forecast_loss + (1.0 - self.lambda_forecast) * recon_loss + self.beta * sparsity
+        else:
+            # Ablation case: only forecast loss
+            recon_loss = torch.tensor(0.0, device=predicted_vals.device)
+            sparsity = torch.tensor(0.0, device=predicted_vals.device)
+            total = forecast_loss
+        
         return {
             "total": total,
             "forecast": forecast_loss,
@@ -253,7 +281,7 @@ class TopoFuSAGNet(nn.Module):
     Data flow (strict order):
     [B,N,W]
       -> MSTCN -> node_feat [B,N,D]
-      -> SAE   -> z [B,N,Z], reconstructed_vals [B,N,W], kl
+      -> SAE (or LinearProjection if use_sae=0) -> z [B,N,Z], reconstructed_vals [B,N,W] (or None), kl (or 0)
       -> GraphLearning -> A [N,N], sensor_embeddings [N,E]
       -> concat(z, sensor_embeddings_broadcast) -> gat_in [B,N,Z+E]
       -> DenseGAT -> fused [B,N,H]
@@ -261,7 +289,7 @@ class TopoFuSAGNet(nn.Module):
 
     forward returns:
     - predicted_vals [B,N]
-    - reconstructed_vals [B,N,W]
+    - reconstructed_vals [B,N,W] (or None if use_sae=0)
     - extra dict with z, kl_sparsity, A, sensor_embeddings
     """
 
@@ -277,13 +305,20 @@ class TopoFuSAGNet(nn.Module):
         rho: float = 0.05,
         dropout: float = 0.1,
         gat_heads: int = 2,
+        use_sae: int = 1,
     ):
         super().__init__()
         self.num_nodes = int(num_nodes)
         self.window_size = int(window_size)
+        self.use_sae = int(use_sae)
 
         self.mstcn = MSTCN(branch_channels=c)
-        self.sae = SparseAutoencoder(in_dim=4 * c, latent_dim=z_dim, window_size=window_size, rho=rho)
+        
+        if self.use_sae:
+            self.sae = SparseAutoencoder(in_dim=4 * c, latent_dim=z_dim, window_size=window_size, rho=rho)
+        else:
+            self.proj = LinearProjection(in_dim=4 * c, out_dim=z_dim)
+        
         self.graph_learning = GraphLearning(num_nodes=num_nodes, embed_dim=emb_dim, topk=topk)
 
         self.gat = DenseGAT(
@@ -306,7 +341,13 @@ class TopoFuSAGNet(nn.Module):
             raise ValueError(f"Input W={win} does not match model window_size={self.window_size}")
 
         node_feat = self.mstcn(x)
-        z, reconstructed_vals, kl_sparsity = self.sae(node_feat)
+        
+        if self.use_sae:
+            z, reconstructed_vals, kl_sparsity = self.sae(node_feat)
+        else:
+            z = self.proj(node_feat)
+            reconstructed_vals = None
+            kl_sparsity = torch.tensor(0.0, device=x.device, dtype=x.dtype)
 
         a, sensor_embeddings = self.graph_learning()
         e_batch = sensor_embeddings.unsqueeze(0).expand(bsz, -1, -1)

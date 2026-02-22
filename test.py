@@ -27,6 +27,7 @@ def weighted_harmonic_mean(fore_err: np.ndarray, recon_err: np.ndarray, score_la
 def get_raw_errors(model, dataloader, criterion, device, recon_target_mode="input"):
     """
     【修正核心】：绝不跨节点做 Mean。保留 [Num_samples, Num_nodes] 形状。
+    当 use_sae=0 时，reconstructed_vals 为 None，recon_err 应为 0。
     """
     model.eval()
     total_meter, fore_meter, recon_meter, kl_meter, steps = 0.0, 0.0, 0.0, 0.0, 0
@@ -49,8 +50,12 @@ def get_raw_errors(model, dataloader, criterion, device, recon_target_mode="inpu
 
             # 【修复点1】：保留 [Batch, Nodes] 维度
             fore_err_batch = torch.abs(predicted_vals - y)
-            # 重建误差只在窗口维度 (dim=2) 平均，保留节点维度
-            recon_err_batch = torch.mean(torch.abs(reconstructed_vals - recon_target), dim=2)
+            
+            # 重建误差：当 reconstructed_vals 为 None（use_sae=0）时，置为 0
+            if reconstructed_vals is not None:
+                recon_err_batch = torch.mean(torch.abs(reconstructed_vals - recon_target), dim=2)
+            else:
+                recon_err_batch = torch.zeros_like(fore_err_batch)
 
             all_fore_err.append(fore_err_batch.cpu().numpy())
             all_recon_err.append(recon_err_batch.cpu().numpy())

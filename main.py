@@ -101,11 +101,13 @@ class Main:
             rho=train_config["rho"],
             dropout=train_config["dropout"],
             gat_heads=train_config["gat_heads"],
+            use_sae=train_config["use_sae"],
         ).to(self.device)
 
         self.criterion = JointLoss(
             lambda_forecast=train_config["lambda_forecast"],
             beta=train_config["beta"],
+            use_sae=train_config["use_sae"],
         )
         self.optimizer = torch.optim.Adam(
             self.model.parameters(),
@@ -141,7 +143,7 @@ class Main:
                 logger=self.logger,
             )
 
-        self.model.load_state_dict(torch.load(model_save_path, map_location=self.device, weights_only=True))
+        self.model.load_state_dict(torch.load(model_save_path, map_location=self.device, weights_only=True), strict=False)
         self.model.to(self.device)
         self.model.eval()
 
@@ -154,12 +156,17 @@ class Main:
         
         # 2. 核心！计算验证集每个传感器的 Median 和 IQR
         fore_median, fore_iqr = get_val_stats(val_res["fore_err"])
-        recon_median, recon_iqr = get_val_stats(val_res["recon_err"])
-
-        # 3. 对验证集自身进行标准化并融合
+        
+        # 3. 对验证集进行标准化，融合逻辑基于 use_sae 标志
         val_fore_norm = normalize_and_score(val_res["fore_err"], fore_median, fore_iqr)
-        val_recon_norm = normalize_and_score(val_res["recon_err"], recon_median, recon_iqr)
-        val_fused = weighted_harmonic_mean(val_fore_norm, val_recon_norm, self.train_config["score_lambda"])
+        
+        if self.train_config["use_sae"]:
+            recon_median, recon_iqr = get_val_stats(val_res["recon_err"])
+            val_recon_norm = normalize_and_score(val_res["recon_err"], recon_median, recon_iqr)
+            val_fused = weighted_harmonic_mean(val_fore_norm, val_recon_norm, self.train_config["score_lambda"])
+        else:
+            # Ablation: use_sae=0，只用预测误差
+            val_fused = val_fore_norm
         
         # 【修复点3】：取每个时间步里，所有传感器中“最异常”的那个值作为该时间步的整体分数
         val_anomaly_scores = np.max(val_fused, axis=1) 
@@ -169,8 +176,13 @@ class Main:
         test_res = get_raw_errors(self.model, self.test_dataloader, self.criterion, self.device, self.train_config["recon_target_mode"])
         
         test_fore_norm = normalize_and_score(test_res["fore_err"], fore_median, fore_iqr)
-        test_recon_norm = normalize_and_score(test_res["recon_err"], recon_median, recon_iqr)
-        test_fused = weighted_harmonic_mean(test_fore_norm, test_recon_norm, self.train_config["score_lambda"])
+        
+        if self.train_config["use_sae"]:
+            test_recon_norm = normalize_and_score(test_res["recon_err"], recon_median, recon_iqr)
+            test_fused = weighted_harmonic_mean(test_fore_norm, test_recon_norm, self.train_config["score_lambda"])
+        else:
+            # Ablation: use_sae=0，只用预测误差
+            test_fused = test_fore_norm
 
         # =========================================================================
         # 取每个时间步所有传感器中的最大异常值
@@ -297,6 +309,7 @@ if __name__ == "__main__":
 
     parser.add_argument("-lambda_forecast", type=float, default=0.5, help="joint loss forecast weight lambda")
     parser.add_argument("-beta", type=float, default=1e-3, help="joint loss sparsity weight beta")
+    parser.add_argument("-use_sae", type=int, default=1, help="whether to use SAE (1=yes, 0=no for ablation)")
 
     parser.add_argument("-score_lambda", type=float, default=0.5, help="WHM score fusion weight lambda")
     parser.add_argument("-recon_target_mode", type=str, default="input", help="input / (future custom mode)")
@@ -332,6 +345,7 @@ if __name__ == "__main__":
         "dropout": args.dropout,
         "lambda_forecast": args.lambda_forecast,
         "beta": args.beta,
+        "use_sae": args.use_sae,
         "score_lambda": args.score_lambda,
         "recon_target_mode": args.recon_target_mode,
         "log_interval": args.log_interval,
