@@ -2,6 +2,7 @@
 import argparse
 import os
 import random
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -324,7 +325,20 @@ if __name__ == "__main__":
     parser.add_argument("-slide_win", type=int, default=15)
     parser.add_argument("-slide_stride", type=int, default=1)
     parser.add_argument("-val_ratio", type=float, default=0.2)
-    parser.add_argument("-random_seed", type=int, default=5)
+    parser.add_argument(
+        "-random_seed",
+        dest="random_seed",
+        type=int,
+        default=5,
+        help="random seed (legacy name; overridden by -seed if both are provided)",
+    )
+    parser.add_argument(
+        "-seed",
+        dest="seed",
+        type=int,
+        default=None,
+        help="random seed (preferred alias; takes priority over -random_seed)",
+    )
 
     parser.add_argument("-lr", type=float, default=1e-3)
     parser.add_argument("-decay", type=float, default=0.0)
@@ -350,14 +364,23 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    random.seed(args.random_seed)
-    np.random.seed(args.random_seed)
-    torch.manual_seed(args.random_seed)
-    torch.cuda.manual_seed(args.random_seed)
-    torch.cuda.manual_seed_all(args.random_seed)
+    seed_provided = "-seed" in sys.argv
+    random_seed_provided = "-random_seed" in sys.argv
+    resolved_seed = args.seed if args.seed is not None else args.random_seed
+    if seed_provided and random_seed_provided:
+        print(
+            f"[Warning] Both -random_seed ({args.random_seed}) and -seed ({args.seed}) are provided. "
+            f"Using -seed={resolved_seed}."
+        )
+
+    random.seed(resolved_seed)
+    np.random.seed(resolved_seed)
+    torch.manual_seed(resolved_seed)
+    torch.cuda.manual_seed(resolved_seed)
+    torch.cuda.manual_seed_all(resolved_seed)
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
-    os.environ["PYTHONHASHSEED"] = str(args.random_seed)
+    os.environ["PYTHONHASHSEED"] = str(resolved_seed)
 
     train_config = {
         "batch": args.batch,
@@ -365,7 +388,7 @@ if __name__ == "__main__":
         "slide_win": args.slide_win,
         "slide_stride": args.slide_stride,
         "val_ratio": args.val_ratio,
-        "seed": args.random_seed,
+        "seed": resolved_seed,
         "lr": args.lr,
         "decay": args.decay,
         "c": args.c,
