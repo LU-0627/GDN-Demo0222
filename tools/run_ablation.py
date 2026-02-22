@@ -15,6 +15,12 @@ from typing import Dict, List, Optional, Tuple
 BEST_F1_PATTERN = re.compile(
     r"Best-F1\s*阈值=([0-9eE+\-.]+)\]\s*F1=([0-9eE+\-.]+)\s*\|\s*P=([0-9eE+\-.]+)\s*\|\s*R=([0-9eE+\-.]+)"
 )
+FORE_STATS_PATTERN = re.compile(
+    r"fore_score stats \(test, max over nodes\):\s*min=[0-9eE+\-.]+,\s*median=([0-9eE+\-.]+),\s*p95=([0-9eE+\-.]+),\s*max=[0-9eE+\-.]+"
+)
+SPARSITY_STATS_PATTERN = re.compile(
+    r"sparsity_score stats \(test, max over nodes\):\s*min=[0-9eE+\-.]+,\s*median=([0-9eE+\-.]+),\s*p95=([0-9eE+\-.]+),\s*max=[0-9eE+\-.]+"
+)
 
 
 @dataclass
@@ -51,6 +57,33 @@ def _parse_best_f1(output: str) -> Tuple[float, float, float, float]:
         raise RuntimeError("Cannot find Best-F1 line in output.")
     best_thresh, f1, p, r = matches[-1]
     return float(f1), float(p), float(r), float(best_thresh)
+
+
+def _parse_optional_stats(output: str) -> Dict[str, str]:
+    """
+    从日志中提取 fore/sparsity 的 median 与 p95。
+    若缺失（例如 sae_score_type!=sparsity_dev 时未打印），返回空字符串。
+    """
+    result = {
+        "fore_median": "",
+        "fore_p95": "",
+        "sparsity_median": "",
+        "sparsity_p95": "",
+    }
+
+    fore_matches = FORE_STATS_PATTERN.findall(output)
+    if fore_matches:
+        median, p95 = fore_matches[-1]
+        result["fore_median"] = f"{float(median):.6f}"
+        result["fore_p95"] = f"{float(p95):.6f}"
+
+    sparsity_matches = SPARSITY_STATS_PATTERN.findall(output)
+    if sparsity_matches:
+        median, p95 = sparsity_matches[-1]
+        result["sparsity_median"] = f"{float(median):.6f}"
+        result["sparsity_p95"] = f"{float(p95):.6f}"
+
+    return result
 
 
 def _find_latest_checkpoint(repo_root: str, save_path_pattern: str) -> Optional[str]:
@@ -143,6 +176,7 @@ def _run_eval(
     ]
     out = _run_command(cmd, cwd=repo_root)
     f1, precision, recall, best_thresh = _parse_best_f1(out)
+    optional_stats = _parse_optional_stats(out)
 
     return {
         "setting": setting.setting,
@@ -150,6 +184,10 @@ def _run_eval(
         "Precision": f"{precision:.6f}",
         "Recall": f"{recall:.6f}",
         "BestThresh": f"{best_thresh:.6f}",
+        "fore_median": optional_stats["fore_median"],
+        "fore_p95": optional_stats["fore_p95"],
+        "sparsity_median": optional_stats["sparsity_median"],
+        "sparsity_p95": optional_stats["sparsity_p95"],
         "score_lambda": str(setting.score_lambda),
         "sae_score_type": setting.sae_score_type,
         "use_sae": str(setting.use_sae),
@@ -165,6 +203,10 @@ def _write_csv(rows: List[Dict[str, str]], output_csv: str):
         "Precision",
         "Recall",
         "BestThresh",
+        "fore_median",
+        "fore_p95",
+        "sparsity_median",
+        "sparsity_p95",
         "score_lambda",
         "sae_score_type",
         "use_sae",
@@ -184,6 +226,10 @@ def _write_markdown(rows: List[Dict[str, str]], output_md: str):
         "Precision",
         "Recall",
         "BestThresh",
+        "fore_median",
+        "fore_p95",
+        "sparsity_median",
+        "sparsity_p95",
         "score_lambda",
         "sae_score_type",
         "use_sae",
