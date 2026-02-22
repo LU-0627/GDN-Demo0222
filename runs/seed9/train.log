@@ -1,0 +1,251 @@
+[2026-02-22 20:07:58] [INFO] 日志文件路径: /root/GDN-Demo0222/runs/swat_02-22-20-07-58/train.log
+[2026-02-22 20:07:58] [INFO] 当前时区: Asia/Shanghai
+[2026-02-22 20:07:58] [INFO] 当前时间: 2026-02-22 20:07:58 CST
+[2026-02-22 20:07:58] [INFO] ===== 实验开始 =====
+[2026-02-22 20:07:58] [INFO] 数据集: swat | 设备: cuda
+[2026-02-22 20:07:58] [INFO] train_config: {'batch': 64, 'epoch': 30, 'slide_win': 15, 'slide_stride': 1, 'val_ratio': 0.2, 'seed': 9, 'lr': 0.001, 'decay': 0.0, 'c': 16, 'z_dim': 12, 'emb_dim': 10, 'gat_out_dim': 32, 'gat_heads': 2, 'topk': 5, 'rho': 0.05, 'dropout': 0.1, 'lambda_forecast': 0.5, 'beta': 0.001, 'use_sae': 1, 'score_lambda': 1.0, 'sae_score_type': 'recon', 'recon_target_mode': 'input', 'log_interval': 100, 'graph_warmup_epochs': 5}
+[2026-02-22 20:07:58] [INFO] env_config: {'dataset': 'swat', 'device': 'cuda', 'load_model_path': ''}
+[2026-02-22 20:07:58] [INFO] Graph warmup: freeze graph_learning (epoch 1 < 5)
+[2026-02-22 20:08:00] [INFO] [Train][Epoch 1/30][Step 100] total=0.183489 fore=0.164737 recon=0.189125 kl=6.558415
+[2026-02-22 20:08:02] [INFO] [Train][Epoch 1/30][Step 200] total=0.114941 fore=0.119310 recon=0.097263 kl=6.655003
+[2026-02-22 20:08:03] [INFO] [Train][Epoch 1/30][Step 300] total=0.084286 fore=0.089470 recon=0.065908 kl=6.596857
+[2026-02-22 20:08:05] [INFO] [Train][Epoch 1/30][Step 400] total=0.068329 fore=0.073528 recon=0.050234 kl=6.447723
+[2026-02-22 20:08:06] [INFO] [Train][Epoch 1/30][Step 500] total=0.058297 fore=0.063285 recon=0.040806 kl=6.251623
+[2026-02-22 20:08:08] [INFO] [Train][Epoch 1/30][Step 600] total=0.051266 fore=0.055936 recon=0.034537 kl=6.029512
+[2026-02-22 20:08:09] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.012325)
+[2026-02-22 20:08:09] [INFO] [Epoch 1/30] Train(total=0.050158, fore=0.054770, recon=0.033575, kl=5.985368) | Val(total=0.012325, fore=0.012378, recon=0.003178, kl=4.546671)
+[2026-02-22 20:08:09] [INFO] Graph warmup: freeze graph_learning (epoch 2 < 5)
+[2026-02-22 20:08:11] [INFO] [Train][Epoch 2/30][Step 100] total=0.014265 fore=0.016869 recon=0.003086 kl=4.286753
+[2026-02-22 20:08:12] [INFO] [Train][Epoch 2/30][Step 200] total=0.013829 fore=0.016512 recon=0.003042 kl=4.051724
+[2026-02-22 20:08:14] [INFO] [Train][Epoch 2/30][Step 300] total=0.013375 fore=0.016002 recon=0.003076 kl=3.835786
+[2026-02-22 20:08:15] [INFO] [Train][Epoch 2/30][Step 400] total=0.012986 fore=0.015614 recon=0.003103 kl=3.627190
+[2026-02-22 20:08:17] [INFO] [Train][Epoch 2/30][Step 500] total=0.012591 fore=0.015222 recon=0.003105 kl=3.427678
+[2026-02-22 20:08:18] [INFO] [Train][Epoch 2/30][Step 600] total=0.012206 fore=0.014830 recon=0.003105 kl=3.238517
+[2026-02-22 20:08:19] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.008043)
+[2026-02-22 20:08:19] [INFO] [Epoch 2/30] Train(total=0.012134, fore=0.014764, recon=0.003096, kl=3.203779) | Val(total=0.008043, fore=0.008763, recon=0.003163, kl=2.079617)
+[2026-02-22 20:08:19] [INFO] Graph warmup: freeze graph_learning (epoch 3 < 5)
+[2026-02-22 20:08:21] [INFO] [Train][Epoch 3/30][Step 100] total=0.009807 fore=0.012560 recon=0.003171 kl=1.941185
+[2026-02-22 20:08:22] [INFO] [Train][Epoch 3/30][Step 200] total=0.009515 fore=0.012310 recon=0.003095 kl=1.812578
+[2026-02-22 20:08:24] [INFO] [Train][Epoch 3/30][Step 300] total=0.009350 fore=0.012206 recon=0.003111 kl=1.691721
+[2026-02-22 20:08:25] [INFO] [Train][Epoch 3/30][Step 400] total=0.009123 fore=0.011976 recon=0.003109 kl=1.580885
+[2026-02-22 20:08:27] [INFO] [Train][Epoch 3/30][Step 500] total=0.008957 fore=0.011867 recon=0.003088 kl=1.479560
+[2026-02-22 20:08:28] [INFO] [Train][Epoch 3/30][Step 600] total=0.008840 fore=0.011814 recon=0.003087 kl=1.389222
+[2026-02-22 20:08:30] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.006727)
+[2026-02-22 20:08:30] [INFO] [Epoch 3/30] Train(total=0.008809, fore=0.011786, recon=0.003085, kl=1.373209) | Val(total=0.006727, fore=0.008590, recon=0.003149, kl=0.857530)
+[2026-02-22 20:08:30] [INFO] Graph warmup: freeze graph_learning (epoch 4 < 5)
+[2026-02-22 20:08:31] [INFO] [Train][Epoch 4/30][Step 100] total=0.007710 fore=0.010837 recon=0.002977 kl=0.802986
+[2026-02-22 20:08:33] [INFO] [Train][Epoch 4/30][Step 200] total=0.007677 fore=0.010836 recon=0.003014 kl=0.752584
+[2026-02-22 20:08:34] [INFO] [Train][Epoch 4/30][Step 300] total=0.007691 fore=0.010881 recon=0.003085 kl=0.708235
+[2026-02-22 20:08:35] [INFO] [Train][Epoch 4/30][Step 400] total=0.007595 fore=0.010803 recon=0.003048 kl=0.669437
+[2026-02-22 20:08:37] [INFO] [Train][Epoch 4/30][Step 500] total=0.007579 fore=0.010823 recon=0.003066 kl=0.634575
+[2026-02-22 20:08:38] [INFO] [Train][Epoch 4/30][Step 600] total=0.007517 fore=0.010762 recon=0.003067 kl=0.602845
+[2026-02-22 20:08:40] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.005698)
+[2026-02-22 20:08:40] [INFO] [Epoch 4/30] Train(total=0.007509, fore=0.010755, recon=0.003068, kl=0.597160) | Val(total=0.005698, fore=0.007445, recon=0.003122, kl=0.414505)
+[2026-02-22 20:08:40] [INFO] Graph warmup: unfreeze graph_learning (epoch 5 == 5)
+[2026-02-22 20:08:41] [INFO] [Train][Epoch 5/30][Step 100] total=0.007430 fore=0.010820 recon=0.003252 kl=0.393698
+[2026-02-22 20:08:43] [INFO] [Train][Epoch 5/30][Step 200] total=0.007117 fore=0.010336 recon=0.003144 kl=0.377246
+[2026-02-22 20:08:44] [INFO] [Train][Epoch 5/30][Step 300] total=0.007089 fore=0.010360 recon=0.003094 kl=0.362429
+[2026-02-22 20:08:46] [INFO] [Train][Epoch 5/30][Step 400] total=0.006931 fore=0.010100 recon=0.003065 kl=0.348470
+[2026-02-22 20:08:47] [INFO] [Train][Epoch 5/30][Step 500] total=0.006690 fore=0.009683 recon=0.003028 kl=0.334421
+[2026-02-22 20:08:49] [INFO] [Train][Epoch 5/30][Step 600] total=0.006569 fore=0.009457 recon=0.003040 kl=0.320527
+[2026-02-22 20:08:50] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.004835)
+[2026-02-22 20:08:50] [INFO] [Epoch 5/30] Train(total=0.006546, fore=0.009418, recon=0.003038, kl=0.317931) | Val(total=0.004835, fore=0.006121, recon=0.003077, kl=0.235344)
+[2026-02-22 20:08:51] [INFO] [Train][Epoch 6/30][Step 100] total=0.005893 fore=0.008306 recon=0.003036 kl=0.221743
+[2026-02-22 20:08:53] [INFO] [Train][Epoch 6/30][Step 200] total=0.005816 fore=0.008231 recon=0.002976 kl=0.212073
+[2026-02-22 20:08:54] [INFO] [Train][Epoch 6/30][Step 300] total=0.005892 fore=0.008399 recon=0.002978 kl=0.203546
+[2026-02-22 20:08:56] [INFO] [Train][Epoch 6/30][Step 400] total=0.005971 fore=0.008551 recon=0.002997 kl=0.196230
+[2026-02-22 20:08:57] [INFO] [Train][Epoch 6/30][Step 500] total=0.005924 fore=0.008462 recon=0.003007 kl=0.189524
+[2026-02-22 20:08:59] [INFO] [Train][Epoch 6/30][Step 600] total=0.005855 fore=0.008358 recon=0.002986 kl=0.182988
+[2026-02-22 20:09:00] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.004627)
+[2026-02-22 20:09:00] [INFO] [Epoch 6/30] Train(total=0.005836, fore=0.008320, recon=0.002988, kl=0.181790) | Val(total=0.004627, fore=0.005938, recon=0.003027, kl=0.144580)
+[2026-02-22 20:09:02] [INFO] [Train][Epoch 7/30][Step 100] total=0.005363 fore=0.007522 recon=0.002929 kl=0.137337
+[2026-02-22 20:09:03] [INFO] [Train][Epoch 7/30][Step 200] total=0.005538 fore=0.007882 recon=0.002928 kl=0.132767
+[2026-02-22 20:09:05] [INFO] [Train][Epoch 7/30][Step 300] total=0.005456 fore=0.007727 recon=0.002928 kl=0.128520
+[2026-02-22 20:09:06] [INFO] [Train][Epoch 7/30][Step 400] total=0.005418 fore=0.007677 recon=0.002910 kl=0.124481
+[2026-02-22 20:09:07] [INFO] [Train][Epoch 7/30][Step 500] total=0.005368 fore=0.007589 recon=0.002907 kl=0.120544
+[2026-02-22 20:09:09] [INFO] [Train][Epoch 7/30][Step 600] total=0.005330 fore=0.007525 recon=0.002900 kl=0.117226
+[2026-02-22 20:09:10] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.004598)
+[2026-02-22 20:09:10] [INFO] [Epoch 7/30] Train(total=0.005327, fore=0.007519, recon=0.002902, kl=0.116608) | Val(total=0.004598, fore=0.006088, recon=0.002912, kl=0.098382)
+[2026-02-22 20:09:12] [INFO] [Train][Epoch 8/30][Step 100] total=0.005170 fore=0.007150 recon=0.003001 kl=0.094133
+[2026-02-22 20:09:13] [INFO] [Train][Epoch 8/30][Step 200] total=0.005237 fore=0.007405 recon=0.002884 kl=0.091978
+[2026-02-22 20:09:15] [INFO] [Train][Epoch 8/30][Step 300] total=0.005127 fore=0.007248 recon=0.002828 kl=0.089315
+[2026-02-22 20:09:16] [INFO] [Train][Epoch 8/30][Step 400] total=0.005065 fore=0.007173 recon=0.002783 kl=0.087202
+[2026-02-22 20:09:18] [INFO] [Train][Epoch 8/30][Step 500] total=0.005021 fore=0.007103 recon=0.002768 kl=0.085270
+[2026-02-22 20:09:19] [INFO] [Train][Epoch 8/30][Step 600] total=0.004973 fore=0.007028 recon=0.002751 kl=0.083435
+[2026-02-22 20:09:21] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.004533)
+[2026-02-22 20:09:21] [INFO] [Epoch 8/30] Train(total=0.004976, fore=0.007028, recon=0.002758, kl=0.083060) | Val(total=0.004533, fore=0.006199, recon=0.002722, kl=0.072189)
+[2026-02-22 20:09:22] [INFO] [Train][Epoch 9/30][Step 100] total=0.004410 fore=0.006097 recon=0.002584 kl=0.070069
+[2026-02-22 20:09:24] [INFO] [Train][Epoch 9/30][Step 200] total=0.004499 fore=0.006316 recon=0.002545 kl=0.068661
+[2026-02-22 20:09:25] [INFO] [Train][Epoch 9/30][Step 300] total=0.004554 fore=0.006406 recon=0.002568 kl=0.066978
+[2026-02-22 20:09:27] [INFO] [Train][Epoch 9/30][Step 400] total=0.004646 fore=0.006570 recon=0.002592 kl=0.065455
+[2026-02-22 20:09:28] [INFO] [Train][Epoch 9/30][Step 500] total=0.004598 fore=0.006529 recon=0.002539 kl=0.063694
+[2026-02-22 20:09:29] [INFO] [Train][Epoch 9/30][Step 600] total=0.004592 fore=0.006548 recon=0.002512 kl=0.061817
+[2026-02-22 20:09:31] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.003979)
+[2026-02-22 20:09:31] [INFO] [Epoch 9/30] Train(total=0.004592, fore=0.006554, recon=0.002507, kl=0.061464) | Val(total=0.003979, fore=0.005461, recon=0.002397, kl=0.050159)
+[2026-02-22 20:09:32] [INFO] [Train][Epoch 10/30][Step 100] total=0.004724 fore=0.007007 recon=0.002343 kl=0.048805
+[2026-02-22 20:09:34] [INFO] [Train][Epoch 10/30][Step 200] total=0.004740 fore=0.007116 recon=0.002268 kl=0.047938
+[2026-02-22 20:09:35] [INFO] [Train][Epoch 10/30][Step 300] total=0.004713 fore=0.007071 recon=0.002261 kl=0.047269
+[2026-02-22 20:09:37] [INFO] [Train][Epoch 10/30][Step 400] total=0.004638 fore=0.006956 recon=0.002228 kl=0.046334
+[2026-02-22 20:09:38] [INFO] [Train][Epoch 10/30][Step 500] total=0.004593 fore=0.006915 recon=0.002180 kl=0.045668
+[2026-02-22 20:09:40] [INFO] [Train][Epoch 10/30][Step 600] total=0.004520 fore=0.006784 recon=0.002166 kl=0.045014
+[2026-02-22 20:09:41] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.003226)
+[2026-02-22 20:09:41] [INFO] [Epoch 10/30] Train(total=0.004493, fore=0.006735, recon=0.002162, kl=0.044855) | Val(total=0.003226, fore=0.004346, recon=0.002025, kl=0.040543)
+[2026-02-22 20:09:43] [INFO] [Train][Epoch 11/30][Step 100] total=0.003979 fore=0.005903 recon=0.001977 kl=0.039233
+[2026-02-22 20:09:44] [INFO] [Train][Epoch 11/30][Step 200] total=0.003874 fore=0.005762 recon=0.001909 kl=0.038750
+[2026-02-22 20:09:45] [INFO] [Train][Epoch 11/30][Step 300] total=0.003908 fore=0.005845 recon=0.001895 kl=0.038219
+[2026-02-22 20:09:47] [INFO] [Train][Epoch 11/30][Step 400] total=0.003937 fore=0.005931 recon=0.001867 kl=0.037681
+[2026-02-22 20:09:49] [INFO] [Train][Epoch 11/30][Step 500] total=0.003902 fore=0.005888 recon=0.001842 kl=0.037110
+[2026-02-22 20:09:50] [INFO] [Train][Epoch 11/30][Step 600] total=0.003944 fore=0.005978 recon=0.001838 kl=0.036581
+[2026-02-22 20:09:51] [INFO] [Epoch 11/30] Train(total=0.003939, fore=0.005970, recon=0.001836, kl=0.036465) | Val(total=0.003350, fore=0.004875, recon=0.001757, kl=0.034050)
+[2026-02-22 20:09:53] [INFO] [Train][Epoch 12/30][Step 100] total=0.003953 fore=0.006231 recon=0.001609 kl=0.032770
+[2026-02-22 20:09:54] [INFO] [Train][Epoch 12/30][Step 200] total=0.003973 fore=0.006233 recon=0.001647 kl=0.032374
+[2026-02-22 20:09:56] [INFO] [Train][Epoch 12/30][Step 300] total=0.003989 fore=0.006248 recon=0.001666 kl=0.031819
+[2026-02-22 20:09:57] [INFO] [Train][Epoch 12/30][Step 400] total=0.003923 fore=0.006120 recon=0.001664 kl=0.031020
+[2026-02-22 20:09:59] [INFO] [Train][Epoch 12/30][Step 500] total=0.003862 fore=0.006008 recon=0.001655 kl=0.030224
+[2026-02-22 20:10:00] [INFO] [Train][Epoch 12/30][Step 600] total=0.003807 fore=0.005910 recon=0.001645 kl=0.029444
+[2026-02-22 20:10:01] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.003020)
+[2026-02-22 20:10:01] [INFO] [Epoch 12/30] Train(total=0.003794, fore=0.005884, recon=0.001646, kl=0.029289) | Val(total=0.003020, fore=0.004357, recon=0.001631, kl=0.025733)
+[2026-02-22 20:10:03] [INFO] [Train][Epoch 13/30][Step 100] total=0.003508 fore=0.005363 recon=0.001605 kl=0.024033
+[2026-02-22 20:10:04] [INFO] [Train][Epoch 13/30][Step 200] total=0.003638 fore=0.005641 recon=0.001587 kl=0.023526
+[2026-02-22 20:10:06] [INFO] [Train][Epoch 13/30][Step 300] total=0.003655 fore=0.005680 recon=0.001583 kl=0.023080
+[2026-02-22 20:10:07] [INFO] [Train][Epoch 13/30][Step 400] total=0.003646 fore=0.005686 recon=0.001561 kl=0.022854
+[2026-02-22 20:10:09] [INFO] [Train][Epoch 13/30][Step 500] total=0.003613 fore=0.005617 recon=0.001563 kl=0.022525
+[2026-02-22 20:10:10] [INFO] [Train][Epoch 13/30][Step 600] total=0.003601 fore=0.005598 recon=0.001561 kl=0.022079
+[2026-02-22 20:10:12] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.002804)
+[2026-02-22 20:10:12] [INFO] [Epoch 13/30] Train(total=0.003606, fore=0.005602, recon=0.001566, kl=0.021997) | Val(total=0.002804, fore=0.003972, recon=0.001597, kl=0.020030)
+[2026-02-22 20:10:13] [INFO] [Train][Epoch 14/30][Step 100] total=0.003483 fore=0.005432 recon=0.001497 kl=0.018535
+[2026-02-22 20:10:15] [INFO] [Train][Epoch 14/30][Step 200] total=0.003772 fore=0.006001 recon=0.001507 kl=0.018100
+[2026-02-22 20:10:16] [INFO] [Train][Epoch 14/30][Step 300] total=0.003725 fore=0.005885 recon=0.001529 kl=0.018053
+[2026-02-22 20:10:18] [INFO] [Train][Epoch 14/30][Step 400] total=0.003715 fore=0.005860 recon=0.001534 kl=0.017872
+[2026-02-22 20:10:19] [INFO] [Train][Epoch 14/30][Step 500] total=0.003785 fore=0.005996 recon=0.001539 kl=0.017657
+[2026-02-22 20:10:20] [INFO] [Train][Epoch 14/30][Step 600] total=0.003814 fore=0.006052 recon=0.001540 kl=0.017511
+[2026-02-22 20:10:22] [INFO] [Epoch 14/30] Train(total=0.003825, fore=0.006070, recon=0.001545, kl=0.017462) | Val(total=0.003068, fore=0.004528, recon=0.001573, kl=0.017522)
+[2026-02-22 20:10:23] [INFO] [Train][Epoch 15/30][Step 100] total=0.003686 fore=0.005727 recon=0.001613 kl=0.016256
+[2026-02-22 20:10:25] [INFO] [Train][Epoch 15/30][Step 200] total=0.003567 fore=0.005554 recon=0.001549 kl=0.016028
+[2026-02-22 20:10:26] [INFO] [Train][Epoch 15/30][Step 300] total=0.003530 fore=0.005481 recon=0.001547 kl=0.015759
+[2026-02-22 20:10:28] [INFO] [Train][Epoch 15/30][Step 400] total=0.003513 fore=0.005455 recon=0.001541 kl=0.015445
+[2026-02-22 20:10:29] [INFO] [Train][Epoch 15/30][Step 500] total=0.003536 fore=0.005492 recon=0.001551 kl=0.015125
+[2026-02-22 20:10:31] [INFO] [Train][Epoch 15/30][Step 600] total=0.003565 fore=0.005561 recon=0.001539 kl=0.014800
+[2026-02-22 20:10:32] [INFO] [Epoch 15/30] Train(total=0.003565, fore=0.005565, recon=0.001536, kl=0.014735) | Val(total=0.003458, fore=0.005245, recon=0.001644, kl=0.013953)
+[2026-02-22 20:10:34] [INFO] [Train][Epoch 16/30][Step 100] total=0.003483 fore=0.005423 recon=0.001518 kl=0.013079
+[2026-02-22 20:10:35] [INFO] [Train][Epoch 16/30][Step 200] total=0.003355 fore=0.005168 recon=0.001517 kl=0.012798
+[2026-02-22 20:10:36] [INFO] [Train][Epoch 16/30][Step 300] total=0.003328 fore=0.005101 recon=0.001530 kl=0.012566
+[2026-02-22 20:10:38] [INFO] [Train][Epoch 16/30][Step 400] total=0.003328 fore=0.005103 recon=0.001528 kl=0.012226
+[2026-02-22 20:10:39] [INFO] [Train][Epoch 16/30][Step 500] total=0.003426 fore=0.005290 recon=0.001538 kl=0.012096
+[2026-02-22 20:10:41] [INFO] [Train][Epoch 16/30][Step 600] total=0.003411 fore=0.005255 recon=0.001543 kl=0.011901
+[2026-02-22 20:10:42] [INFO] [Epoch 16/30] Train(total=0.003414, fore=0.005265, recon=0.001540, kl=0.011875) | Val(total=0.002939, fore=0.004279, recon=0.001576, kl=0.012046)
+[2026-02-22 20:10:44] [INFO] [Train][Epoch 17/30][Step 100] total=0.003497 fore=0.005408 recon=0.001564 kl=0.010657
+[2026-02-22 20:10:45] [INFO] [Train][Epoch 17/30][Step 200] total=0.003390 fore=0.005237 recon=0.001521 kl=0.010439
+[2026-02-22 20:10:47] [INFO] [Train][Epoch 17/30][Step 300] total=0.003396 fore=0.005248 recon=0.001524 kl=0.010197
+[2026-02-22 20:10:48] [INFO] [Train][Epoch 17/30][Step 400] total=0.003351 fore=0.005159 recon=0.001524 kl=0.009909
+[2026-02-22 20:10:50] [INFO] [Train][Epoch 17/30][Step 500] total=0.003384 fore=0.005219 recon=0.001531 kl=0.009691
+[2026-02-22 20:10:51] [INFO] [Train][Epoch 17/30][Step 600] total=0.003385 fore=0.005226 recon=0.001526 kl=0.009567
+[2026-02-22 20:10:53] [INFO] [Epoch 17/30] Train(total=0.003385, fore=0.005220, recon=0.001532, kl=0.009533) | Val(total=0.002889, fore=0.004183, recon=0.001576, kl=0.009837)
+[2026-02-22 20:10:54] [INFO] [Train][Epoch 18/30][Step 100] total=0.003183 fore=0.004892 recon=0.001458 kl=0.008545
+[2026-02-22 20:10:56] [INFO] [Train][Epoch 18/30][Step 200] total=0.003219 fore=0.004932 recon=0.001489 kl=0.008344
+[2026-02-22 20:10:57] [INFO] [Train][Epoch 18/30][Step 300] total=0.003307 fore=0.005082 recon=0.001516 kl=0.008123
+[2026-02-22 20:10:59] [INFO] [Train][Epoch 18/30][Step 400] total=0.003345 fore=0.005156 recon=0.001518 kl=0.007971
+[2026-02-22 20:11:00] [INFO] [Train][Epoch 18/30][Step 500] total=0.003396 fore=0.005244 recon=0.001532 kl=0.007884
+[2026-02-22 20:11:01] [INFO] [Train][Epoch 18/30][Step 600] total=0.003386 fore=0.005224 recon=0.001533 kl=0.007778
+[2026-02-22 20:11:03] [INFO] [Epoch 18/30] Train(total=0.003390, fore=0.005232, recon=0.001533, kl=0.007767) | Val(total=0.002984, fore=0.004377, recon=0.001574, kl=0.008473)
+[2026-02-22 20:11:04] [INFO] [Train][Epoch 19/30][Step 100] total=0.003357 fore=0.005182 recon=0.001518 kl=0.007192
+[2026-02-22 20:11:06] [INFO] [Train][Epoch 19/30][Step 200] total=0.003366 fore=0.005168 recon=0.001551 kl=0.007139
+[2026-02-22 20:11:07] [INFO] [Train][Epoch 19/30][Step 300] total=0.003382 fore=0.005215 recon=0.001535 kl=0.007153
+[2026-02-22 20:11:09] [INFO] [Train][Epoch 19/30][Step 400] total=0.003506 fore=0.005465 recon=0.001533 kl=0.007209
+[2026-02-22 20:11:10] [INFO] [Train][Epoch 19/30][Step 500] total=0.003513 fore=0.005480 recon=0.001532 kl=0.007190
+[2026-02-22 20:11:12] [INFO] [Train][Epoch 19/30][Step 600] total=0.003481 fore=0.005413 recon=0.001534 kl=0.007184
+[2026-02-22 20:11:13] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.002659)
+[2026-02-22 20:11:13] [INFO] [Epoch 19/30] Train(total=0.003471, fore=0.005393, recon=0.001534, kl=0.007194) | Val(total=0.002659, fore=0.003728, recon=0.001574, kl=0.008267)
+[2026-02-22 20:11:15] [INFO] [Train][Epoch 20/30][Step 100] total=0.003053 fore=0.004610 recon=0.001483 kl=0.006795
+[2026-02-22 20:11:16] [INFO] [Train][Epoch 20/30][Step 200] total=0.003256 fore=0.004977 recon=0.001520 kl=0.007102
+[2026-02-22 20:11:18] [INFO] [Train][Epoch 20/30][Step 300] total=0.003247 fore=0.004940 recon=0.001540 kl=0.007122
+[2026-02-22 20:11:19] [INFO] [Train][Epoch 20/30][Step 400] total=0.003182 fore=0.004822 recon=0.001529 kl=0.007046
+[2026-02-22 20:11:21] [INFO] [Train][Epoch 20/30][Step 500] total=0.003164 fore=0.004790 recon=0.001524 kl=0.006981
+[2026-02-22 20:11:22] [INFO] [Train][Epoch 20/30][Step 600] total=0.003156 fore=0.004768 recon=0.001531 kl=0.006867
+[2026-02-22 20:11:24] [INFO] [Epoch 20/30] Train(total=0.003159, fore=0.004771, recon=0.001532, kl=0.006850) | Val(total=0.003508, fore=0.005406, recon=0.001596, kl=0.007451)
+[2026-02-22 20:11:25] [INFO] [Train][Epoch 21/30][Step 100] total=0.003125 fore=0.004700 recon=0.001537 kl=0.006285
+[2026-02-22 20:11:27] [INFO] [Train][Epoch 21/30][Step 200] total=0.002991 fore=0.004448 recon=0.001522 kl=0.006163
+[2026-02-22 20:11:28] [INFO] [Train][Epoch 21/30][Step 300] total=0.002936 fore=0.004341 recon=0.001519 kl=0.006013
+[2026-02-22 20:11:30] [INFO] [Train][Epoch 21/30][Step 400] total=0.002939 fore=0.004340 recon=0.001525 kl=0.005849
+[2026-02-22 20:11:31] [INFO] [Train][Epoch 21/30][Step 500] total=0.002976 fore=0.004415 recon=0.001526 kl=0.005758
+[2026-02-22 20:11:33] [INFO] [Train][Epoch 21/30][Step 600] total=0.002977 fore=0.004415 recon=0.001529 kl=0.005623
+[2026-02-22 20:11:34] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.002371)
+[2026-02-22 20:11:34] [INFO] [Epoch 21/30] Train(total=0.002978, fore=0.004415, recon=0.001529, kl=0.005595) | Val(total=0.002371, fore=0.003159, recon=0.001571, kl=0.006042)
+[2026-02-22 20:11:35] [INFO] [Train][Epoch 22/30][Step 100] total=0.002944 fore=0.004339 recon=0.001540 kl=0.004687
+[2026-02-22 20:11:37] [INFO] [Train][Epoch 22/30][Step 200] total=0.002939 fore=0.004339 recon=0.001529 kl=0.004619
+[2026-02-22 20:11:38] [INFO] [Train][Epoch 22/30][Step 300] total=0.002952 fore=0.004373 recon=0.001521 kl=0.004586
+[2026-02-22 20:11:40] [INFO] [Train][Epoch 22/30][Step 400] total=0.002973 fore=0.004411 recon=0.001526 kl=0.004507
+[2026-02-22 20:11:41] [INFO] [Train][Epoch 22/30][Step 500] total=0.002974 fore=0.004400 recon=0.001540 kl=0.004393
+[2026-02-22 20:11:43] [INFO] [Train][Epoch 22/30][Step 600] total=0.002975 fore=0.004406 recon=0.001535 kl=0.004311
+[2026-02-22 20:11:44] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.002367)
+[2026-02-22 20:11:44] [INFO] [Epoch 22/30] Train(total=0.002971, fore=0.004404, recon=0.001530, kl=0.004302) | Val(total=0.002367, fore=0.003149, recon=0.001575, kl=0.004908)
+[2026-02-22 20:11:45] [INFO] [Train][Epoch 23/30][Step 100] total=0.002988 fore=0.004432 recon=0.001537 kl=0.003747
+[2026-02-22 20:11:47] [INFO] [Train][Epoch 23/30][Step 200] total=0.003006 fore=0.004496 recon=0.001509 kl=0.003773
+[2026-02-22 20:11:48] [INFO] [Train][Epoch 23/30][Step 300] total=0.003056 fore=0.004597 recon=0.001507 kl=0.003713
+[2026-02-22 20:11:50] [INFO] [Train][Epoch 23/30][Step 400] total=0.003057 fore=0.004582 recon=0.001526 kl=0.003582
+[2026-02-22 20:11:51] [INFO] [Train][Epoch 23/30][Step 500] total=0.003123 fore=0.004711 recon=0.001528 kl=0.003515
+[2026-02-22 20:11:53] [INFO] [Train][Epoch 23/30][Step 600] total=0.003129 fore=0.004719 recon=0.001533 kl=0.003516
+[2026-02-22 20:11:54] [INFO] [Epoch 23/30] Train(total=0.003125, fore=0.004716, recon=0.001527, kl=0.003514) | Val(total=0.003296, fore=0.005001, recon=0.001581, kl=0.004896)
+[2026-02-22 20:11:56] [INFO] [Train][Epoch 24/30][Step 100] total=0.003163 fore=0.004793 recon=0.001527 kl=0.003528
+[2026-02-22 20:11:57] [INFO] [Train][Epoch 24/30][Step 200] total=0.003052 fore=0.004556 recon=0.001540 kl=0.003428
+[2026-02-22 20:11:59] [INFO] [Train][Epoch 24/30][Step 300] total=0.003020 fore=0.004493 recon=0.001540 kl=0.003320
+[2026-02-22 20:12:00] [INFO] [Train][Epoch 24/30][Step 400] total=0.003026 fore=0.004509 recon=0.001536 kl=0.003224
+[2026-02-22 20:12:02] [INFO] [Train][Epoch 24/30][Step 500] total=0.002996 fore=0.004450 recon=0.001535 kl=0.003111
+[2026-02-22 20:12:03] [INFO] [Train][Epoch 24/30][Step 600] total=0.003022 fore=0.004508 recon=0.001529 kl=0.003045
+[2026-02-22 20:12:04] [INFO] [Epoch 24/30] Train(total=0.003034, fore=0.004533, recon=0.001529, kl=0.003031) | Val(total=0.002971, fore=0.004329, recon=0.001606, kl=0.004000)
+[2026-02-22 20:12:06] [INFO] [Train][Epoch 25/30][Step 100] total=0.003594 fore=0.005598 recon=0.001585 kl=0.002633
+[2026-02-22 20:12:07] [INFO] [Train][Epoch 25/30][Step 200] total=0.003854 fore=0.006157 recon=0.001545 kl=0.002846
+[2026-02-22 20:12:09] [INFO] [Train][Epoch 25/30][Step 300] total=0.003751 fore=0.005959 recon=0.001537 kl=0.003152
+[2026-02-22 20:12:10] [INFO] [Train][Epoch 25/30][Step 400] total=0.003599 fore=0.005672 recon=0.001519 kl=0.003251
+[2026-02-22 20:12:12] [INFO] [Train][Epoch 25/30][Step 500] total=0.003519 fore=0.005515 recon=0.001517 kl=0.003240
+[2026-02-22 20:12:13] [INFO] [Train][Epoch 25/30][Step 600] total=0.003490 fore=0.005447 recon=0.001527 kl=0.003217
+[2026-02-22 20:12:15] [INFO] [Epoch 25/30] Train(total=0.003476, fore=0.005418, recon=0.001527, kl=0.003206) | Val(total=0.002458, fore=0.003346, recon=0.001562, kl=0.004217)
+[2026-02-22 20:12:16] [INFO] [Train][Epoch 26/30][Step 100] total=0.003199 fore=0.004897 recon=0.001494 kl=0.003001
+[2026-02-22 20:12:18] [INFO] [Train][Epoch 26/30][Step 200] total=0.003053 fore=0.004615 recon=0.001484 kl=0.002888
+[2026-02-22 20:12:19] [INFO] [Train][Epoch 26/30][Step 300] total=0.003079 fore=0.004651 recon=0.001502 kl=0.002787
+[2026-02-22 20:12:21] [INFO] [Train][Epoch 26/30][Step 400] total=0.003089 fore=0.004669 recon=0.001502 kl=0.002765
+[2026-02-22 20:12:22] [INFO] [Train][Epoch 26/30][Step 500] total=0.003108 fore=0.004679 recon=0.001532 kl=0.002748
+[2026-02-22 20:12:24] [INFO] [Train][Epoch 26/30][Step 600] total=0.003058 fore=0.004583 recon=0.001527 kl=0.002686
+[2026-02-22 20:12:25] [INFO] [Epoch 26/30] Train(total=0.003044, fore=0.004561, recon=0.001521, kl=0.002678) | Val(total=0.002633, fore=0.003699, recon=0.001559, kl=0.003827)
+[2026-02-22 20:12:26] [INFO] [Train][Epoch 27/30][Step 100] total=0.002779 fore=0.004000 recon=0.001553 kl=0.002472
+[2026-02-22 20:12:28] [INFO] [Train][Epoch 27/30][Step 200] total=0.002777 fore=0.004011 recon=0.001539 kl=0.002439
+[2026-02-22 20:12:29] [INFO] [Train][Epoch 27/30][Step 300] total=0.002729 fore=0.003917 recon=0.001537 kl=0.002422
+[2026-02-22 20:12:31] [INFO] [Train][Epoch 27/30][Step 400] total=0.002740 fore=0.003950 recon=0.001526 kl=0.002363
+[2026-02-22 20:12:32] [INFO] [Train][Epoch 27/30][Step 500] total=0.002758 fore=0.003984 recon=0.001527 kl=0.002325
+[2026-02-22 20:12:34] [INFO] [Train][Epoch 27/30][Step 600] total=0.002785 fore=0.004049 recon=0.001516 kl=0.002285
+[2026-02-22 20:12:35] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.002286)
+[2026-02-22 20:12:35] [INFO] [Epoch 27/30] Train(total=0.002789, fore=0.004053, recon=0.001520, kl=0.002286) | Val(total=0.002286, fore=0.002991, recon=0.001573, kl=0.003744)
+[2026-02-22 20:12:36] [INFO] [Train][Epoch 28/30][Step 100] total=0.002539 fore=0.003626 recon=0.001448 kl=0.002277
+[2026-02-22 20:12:38] [INFO] [Train][Epoch 28/30][Step 200] total=0.002733 fore=0.003984 recon=0.001477 kl=0.002250
+[2026-02-22 20:12:39] [INFO] [Train][Epoch 28/30][Step 300] total=0.002803 fore=0.004081 recon=0.001520 kl=0.002362
+[2026-02-22 20:12:41] [INFO] [Train][Epoch 28/30][Step 400] total=0.002817 fore=0.004108 recon=0.001522 kl=0.002520
+[2026-02-22 20:12:42] [INFO] [Train][Epoch 28/30][Step 500] total=0.002875 fore=0.004229 recon=0.001515 kl=0.002619
+[2026-02-22 20:12:44] [INFO] [Train][Epoch 28/30][Step 600] total=0.002909 fore=0.004298 recon=0.001515 kl=0.002765
+[2026-02-22 20:12:45] [INFO] [Epoch 28/30] Train(total=0.002931, fore=0.004337, recon=0.001519, kl=0.002784) | Val(total=0.002724, fore=0.003883, recon=0.001555, kl=0.005146)
+[2026-02-22 20:12:47] [INFO] [Train][Epoch 29/30][Step 100] total=0.003273 fore=0.004937 recon=0.001601 kl=0.003531
+[2026-02-22 20:12:48] [INFO] [Train][Epoch 29/30][Step 200] total=0.003123 fore=0.004679 recon=0.001559 kl=0.003609
+[2026-02-22 20:12:50] [INFO] [Train][Epoch 29/30][Step 300] total=0.003079 fore=0.004614 recon=0.001537 kl=0.003580
+[2026-02-22 20:12:51] [INFO] [Train][Epoch 29/30][Step 400] total=0.003045 fore=0.004563 recon=0.001520 kl=0.003531
+[2026-02-22 20:12:53] [INFO] [Train][Epoch 29/30][Step 500] total=0.003019 fore=0.004515 recon=0.001516 kl=0.003416
+[2026-02-22 20:12:54] [INFO] [Train][Epoch 29/30][Step 600] total=0.003000 fore=0.004479 recon=0.001515 kl=0.003315
+[2026-02-22 20:12:56] [INFO] 最佳模型已保存: ./runs/swat_02-22-20-07-58/best.pt (val_total=0.002194)
+[2026-02-22 20:12:56] [INFO] [Epoch 29/30] Train(total=0.002991, fore=0.004461, recon=0.001514, kl=0.003294) | Val(total=0.002194, fore=0.002828, recon=0.001551, kl=0.004352)
+[2026-02-22 20:12:57] [INFO] [Train][Epoch 30/30][Step 100] total=0.003080 fore=0.004647 recon=0.001507 kl=0.002715
+[2026-02-22 20:12:58] [INFO] [Train][Epoch 30/30][Step 200] total=0.003092 fore=0.004664 recon=0.001515 kl=0.002786
+[2026-02-22 20:13:00] [INFO] [Train][Epoch 30/30][Step 300] total=0.002973 fore=0.004430 recon=0.001510 kl=0.002821
+[2026-02-22 20:13:01] [INFO] [Train][Epoch 30/30][Step 400] total=0.002924 fore=0.004325 recon=0.001518 kl=0.002790
+[2026-02-22 20:13:03] [INFO] [Train][Epoch 30/30][Step 500] total=0.002893 fore=0.004275 recon=0.001506 kl=0.002738
+[2026-02-22 20:13:04] [INFO] [Train][Epoch 30/30][Step 600] total=0.002910 fore=0.004306 recon=0.001509 kl=0.002685
+[2026-02-22 20:13:06] [INFO] [Epoch 30/30] Train(total=0.002901, fore=0.004286, recon=0.001511, kl=0.002679) | Val(total=0.002517, fore=0.003468, recon=0.001558, kl=0.004149)
+[2026-02-22 20:13:06] [INFO] 训练完成，共耗时 307.37s
+[2026-02-22 20:13:06] [INFO] Checkpoint missing_keys: []
+[2026-02-22 20:13:06] [INFO] Checkpoint unexpected_keys: []
+[2026-02-22 20:13:06] [INFO] SAE score type: recon
+[2026-02-22 20:13:12] [INFO] =========================** Result **============================
+[2026-02-22 20:13:12] [INFO] SAE Score Type => recon
+[2026-02-22 20:13:12] [INFO] Test Loss => total=0.097161, fore=0.192533, recon=0.001733, kl=0.027719
+[2026-02-22 20:13:12] [INFO] ---
+[2026-02-22 20:13:12] [INFO] [严格验证集阈值=97.378099] F1=0.2797 | P=0.1678 | R=0.8404
+[2026-02-22 20:13:12] [INFO] ---
+[2026-02-22 20:13:12] [INFO] [论文标准 Best-F1 阈值=244.443831] F1=0.7193 | P=0.9876 | R=0.5657  <-- 你的最终战力
+[2026-02-22 20:13:12] [INFO] =================================================================
