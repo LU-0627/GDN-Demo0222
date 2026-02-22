@@ -148,6 +148,18 @@ python main.py -dataset msl -device cuda -epoch 30 -use_sae 1 -score_lambda 0.5 
 python main.py -dataset msl -device cuda -epoch 30 -use_sae 1 -score_lambda 0.5 -sae_score_type sparsity_dev
 ```
 
+#### SWaT A/B/C Auto Ablation Script
+```bash
+# Option 1: bash wrapper
+bash ./run_ablation_swat.sh --device cuda --epoch 30 --c-score-lambda 0.8
+
+# Option 2: python directly
+python tools/run_ablation.py --dataset swat --device cuda --epoch 30 --c-score-lambda 0.8
+```
+- It auto-runs A/B/C settings, reuses checkpoints via `-load_model_path` when available, and writes summary to:
+  - `results/ablation/swat_ablation_summary.csv`
+  - `results/ablation/swat_ablation_summary.md`
+
 
 
 # Others
