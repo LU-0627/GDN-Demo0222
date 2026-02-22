@@ -28,14 +28,15 @@ def test_use_sae_enabled():
         use_sae=1,  # SAE enabled
     )
     
-    predicted_vals, reconstructed_vals, extra = model(x)
+    predicted_vals, reconstructed_vals, kl_sparsity, sparsity_dev = model(x)
     
     # Verify outputs
     assert predicted_vals.shape == (bsz, num_nodes), f"Predicted shape mismatch: {predicted_vals.shape}"
     assert reconstructed_vals is not None, "Reconstruction should not be None with use_sae=1"
     assert reconstructed_vals.shape == (bsz, num_nodes, win), f"Reconstruction shape mismatch: {reconstructed_vals.shape}"
-    assert isinstance(extra["kl_sparsity"], torch.Tensor), "KL sparsity should be a tensor"
-    assert extra["kl_sparsity"] > 0, "KL sparsity should be > 0"
+    assert isinstance(kl_sparsity, torch.Tensor), "KL sparsity should be a tensor"
+    assert kl_sparsity > 0, "KL sparsity should be > 0"
+    assert sparsity_dev.shape == (bsz, num_nodes), "sparsity_dev shape mismatch"
     
     # Test loss
     criterion = JointLoss(lambda_forecast=0.7, beta=1e-3, use_sae=1)
@@ -44,7 +45,7 @@ def test_use_sae_enabled():
         forecast_target=y,
         reconstructed_vals=reconstructed_vals,
         recon_target=x,
-        kl_sparsity=extra["kl_sparsity"],
+        kl_sparsity=kl_sparsity,
     )
     
     assert loss_dict["total"] > 0, "Total loss should be > 0"
@@ -55,7 +56,7 @@ def test_use_sae_enabled():
     print(f"✓ use_sae=1 outputs verified")
     print(f"  - predicted_vals: {predicted_vals.shape}")
     print(f"  - reconstructed_vals: {reconstructed_vals.shape}")
-    print(f"  - kl_sparsity: {extra['kl_sparsity'].item():.6f}")
+    print(f"  - kl_sparsity: {kl_sparsity.item():.6f}")
     print(f"  - total loss: {loss_dict['total'].item():.6f}")
     print(f"  - forecast loss: {loss_dict['forecast'].item():.6f}")
     print(f"  - reconstruction loss: {loss_dict['reconstruction'].item():.6f}")
@@ -84,13 +85,15 @@ def test_use_sae_disabled():
         use_sae=0,  # SAE disabled
     )
     
-    predicted_vals, reconstructed_vals, extra = model(x)
+    predicted_vals, reconstructed_vals, kl_sparsity, sparsity_dev = model(x)
     
     # Verify outputs
     assert predicted_vals.shape == (bsz, num_nodes), f"Predicted shape mismatch: {predicted_vals.shape}"
     assert reconstructed_vals is None, "Reconstruction should be None with use_sae=0"
-    assert isinstance(extra["kl_sparsity"], torch.Tensor), "KL sparsity should be a tensor"
-    assert extra["kl_sparsity"].item() == 0.0, "KL sparsity should be 0.0 with use_sae=0"
+    assert isinstance(kl_sparsity, torch.Tensor), "KL sparsity should be a tensor"
+    assert kl_sparsity.item() == 0.0, "KL sparsity should be 0.0 with use_sae=0"
+    assert sparsity_dev.shape == (bsz, num_nodes), "sparsity_dev shape mismatch"
+    assert torch.allclose(sparsity_dev, torch.zeros_like(sparsity_dev)), "sparsity_dev should be 0 with use_sae=0"
     
     # Test loss
     criterion = JointLoss(lambda_forecast=0.7, beta=1e-3, use_sae=0)
@@ -99,7 +102,7 @@ def test_use_sae_disabled():
         forecast_target=y,
         reconstructed_vals=reconstructed_vals,
         recon_target=x,
-        kl_sparsity=extra["kl_sparsity"],
+        kl_sparsity=kl_sparsity,
     )
     
     assert loss_dict["total"] > 0, "Total loss should be > 0"
@@ -111,7 +114,7 @@ def test_use_sae_disabled():
     print(f"✓ use_sae=0 outputs verified")
     print(f"  - predicted_vals: {predicted_vals.shape}")
     print(f"  - reconstructed_vals: {reconstructed_vals}")
-    print(f"  - kl_sparsity: {extra['kl_sparsity'].item():.6f}")
+    print(f"  - kl_sparsity: {kl_sparsity.item():.6f}")
     print(f"  - total loss: {loss_dict['total'].item():.6f}")
     print(f"  - forecast loss: {loss_dict['forecast'].item():.6f}")
     print(f"  - reconstruction loss: {loss_dict['reconstruction'].item():.6f}")

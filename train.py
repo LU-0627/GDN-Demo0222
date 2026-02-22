@@ -40,6 +40,22 @@ def _get_recon_target(x: torch.Tensor, mode: str = "input") -> torch.Tensor:
     raise ValueError(f"Unsupported recon_target mode: {mode}")
 
 
+def _parse_model_output(model_out):
+    """
+    兼容模型输出格式：
+    1) 新格式: (predicted_vals, reconstructed_vals, kl_sparsity, sparsity_dev)
+    2) 旧格式: (predicted_vals, reconstructed_vals, extra_dict)
+    """
+    if isinstance(model_out, (tuple, list)) and len(model_out) == 4:
+        return model_out[0], model_out[1], model_out[2], model_out[3]
+
+    if isinstance(model_out, (tuple, list)) and len(model_out) == 3 and isinstance(model_out[2], dict):
+        extra = model_out[2]
+        return model_out[0], model_out[1], extra["kl_sparsity"], extra.get("sparsity_dev", None)
+
+    raise TypeError("Model output format is not supported.")
+
+
 def validate_epoch(
     model: torch.nn.Module,
     dataloader,
@@ -60,7 +76,7 @@ def validate_epoch(
             x = x.float().to(device)
             y = y.float().to(device)
 
-            predicted_vals, reconstructed_vals, extra = model(x)
+            predicted_vals, reconstructed_vals, kl_sparsity, _ = _parse_model_output(model(x))
             recon_target = _get_recon_target(x, mode=recon_target_mode)
 
             loss_out = criterion(
@@ -68,7 +84,7 @@ def validate_epoch(
                 forecast_target=y,
                 reconstructed_vals=reconstructed_vals,
                 recon_target=recon_target,
-                kl_sparsity=extra["kl_sparsity"],
+                kl_sparsity=kl_sparsity,
             )
             total_loss, loss_fore, loss_recon, loss_kl = _parse_joint_loss_output(loss_out)
 
@@ -153,7 +169,7 @@ def train(
 
             optimizer.zero_grad()
 
-            predicted_vals, reconstructed_vals, extra = model(x)
+            predicted_vals, reconstructed_vals, kl_sparsity, _ = _parse_model_output(model(x))
 
             # ===== 关键注释：重建目标切换入口 =====
             # 默认用原始输入窗口 x 作为 recon_target。
@@ -169,7 +185,7 @@ def train(
                 forecast_target=y,
                 reconstructed_vals=reconstructed_vals,
                 recon_target=recon_target,
-                kl_sparsity=extra["kl_sparsity"],
+                kl_sparsity=kl_sparsity,
             )
 
             total_loss, loss_fore, loss_recon, loss_kl = _parse_joint_loss_output(loss_out)

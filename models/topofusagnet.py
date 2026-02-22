@@ -296,7 +296,8 @@ class TopoFuSAGNet(nn.Module):
     forward returns:
     - predicted_vals [B,N]
     - reconstructed_vals [B,N,W] (or None if use_sae=0)
-    - extra dict with z, kl_sparsity, sparsity_dev, A, sensor_embeddings
+    - kl_sparsity scalar
+    - sparsity_dev [B,N]
     """
 
     def __init__(
@@ -363,14 +364,7 @@ class TopoFuSAGNet(nn.Module):
         fused = self.gat(gat_in, a)
         predicted_vals = self.forecast_head(fused).squeeze(-1)
 
-        extra = {
-            "z": z,
-            "kl_sparsity": kl_sparsity,
-            "sparsity_dev": sparsity_dev,
-            "A": a,
-            "sensor_embeddings": sensor_embeddings,
-        }
-        return predicted_vals, reconstructed_vals, extra
+        return predicted_vals, reconstructed_vals, kl_sparsity, sparsity_dev
 
 
 if __name__ == "__main__":
@@ -393,13 +387,11 @@ if __name__ == "__main__":
         gat_heads=2,
     )
 
-    predicted_vals, reconstructed_vals, extra = model(x)
+    predicted_vals, reconstructed_vals, kl_sparsity, sparsity_dev = model(x)
 
     assert predicted_vals.shape == (bsz, num_nodes)
     assert reconstructed_vals.shape == (bsz, num_nodes, win)
-    assert extra["z"].shape[:2] == (bsz, num_nodes)
-    assert extra["A"].shape == (num_nodes, num_nodes)
-    assert extra["sensor_embeddings"].shape[0] == num_nodes
+    assert sparsity_dev.shape == (bsz, num_nodes)
 
     criterion = JointLoss(lambda_forecast=0.7, beta=1e-3)
     loss_dict = criterion(
@@ -407,12 +399,11 @@ if __name__ == "__main__":
         forecast_target=forecast_target,
         reconstructed_vals=reconstructed_vals,
         recon_target=x,
-        kl_sparsity=extra["kl_sparsity"],
+        kl_sparsity=kl_sparsity,
     )
 
     print("predicted_vals:", predicted_vals.shape)
     print("reconstructed_vals:", reconstructed_vals.shape)
-    print("z:", extra["z"].shape)
-    print("A:", extra["A"].shape)
-    print("sensor_embeddings:", extra["sensor_embeddings"].shape)
+    print("kl_sparsity:", float(kl_sparsity.detach().cpu()))
+    print("sparsity_dev:", sparsity_dev.shape)
     print({k: float(v.detach().cpu()) for k, v in loss_dict.items()})

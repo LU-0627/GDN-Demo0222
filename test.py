@@ -24,6 +24,22 @@ def weighted_harmonic_mean(fore_err: np.ndarray, recon_err: np.ndarray, score_la
     denom = score_lambda / fore_err + (1.0 - score_lambda) / recon_err
     return 1.0 / denom
 
+
+def _parse_model_output(model_out):
+    """
+    兼容模型输出格式：
+    1) 新格式: (predicted_vals, reconstructed_vals, kl_sparsity, sparsity_dev)
+    2) 旧格式: (predicted_vals, reconstructed_vals, extra_dict)
+    """
+    if isinstance(model_out, (tuple, list)) and len(model_out) == 4:
+        return model_out[0], model_out[1], model_out[2], model_out[3]
+
+    if isinstance(model_out, (tuple, list)) and len(model_out) == 3 and isinstance(model_out[2], dict):
+        extra = model_out[2]
+        return model_out[0], model_out[1], extra["kl_sparsity"], extra.get("sparsity_dev", None)
+
+    raise TypeError("Model output format is not supported.")
+
 def get_raw_errors(model, dataloader, criterion, device, recon_target_mode="input", sae_score_type="recon"):
     """
     【修正核心】：绝不跨节点做 Mean。保留 [Num_samples, Num_nodes] 形状。
@@ -39,10 +55,10 @@ def get_raw_errors(model, dataloader, criterion, device, recon_target_mode="inpu
     with torch.no_grad():
         for x, y, labels, _ in dataloader:
             x, y, labels = x.float().to(device), y.float().to(device), labels.float().to(device)
-            predicted_vals, reconstructed_vals, extra = model(x)
+            predicted_vals, reconstructed_vals, kl_sparsity, sparsity_dev_batch = _parse_model_output(model(x))
             recon_target = _get_recon_target(x, mode=recon_target_mode)
 
-            loss_out = criterion(predicted_vals, y, reconstructed_vals, recon_target, extra["kl_sparsity"])
+            loss_out = criterion(predicted_vals, y, reconstructed_vals, recon_target, kl_sparsity)
             total_loss, loss_fore, loss_recon, loss_kl = _parse_joint_loss_output(loss_out)
 
             total_meter += float(total_loss.item())
@@ -60,9 +76,7 @@ def get_raw_errors(model, dataloader, criterion, device, recon_target_mode="inpu
             else:
                 recon_err_batch = torch.zeros_like(fore_err_batch)
 
-            if "sparsity_dev" in extra and extra["sparsity_dev"] is not None:
-                sparsity_dev_batch = extra["sparsity_dev"]
-            else:
+            if sparsity_dev_batch is None:
                 sparsity_dev_batch = torch.zeros_like(fore_err_batch)
 
             all_fore_err.append(fore_err_batch.cpu().numpy())
