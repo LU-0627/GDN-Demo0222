@@ -346,6 +346,7 @@ if __name__ == "__main__":
     parser.add_argument("-sae_score_type", type=str, default="recon", choices=["recon", "sparsity_dev"], help="SAE score type for fusion")
     parser.add_argument("-recon_target_mode", type=str, default="input", help="input / (future custom mode)")
     parser.add_argument("-log_interval", type=int, default=100)
+    parser.add_argument("-timezone", type=str, default="Asia/Shanghai", help="时区设置，例如: Asia/Shanghai, UTC, America/New_York")
 
     args = parser.parse_args()
 
@@ -396,7 +397,7 @@ if __name__ == "__main__":
     # 初始化 logger（需要 datestr，创建 Main 后再生成）
     main_instance.get_save_path()  # 触发 datestr 初始化
     run_name = f"{args.dataset}_{main_instance.datestr}"
-    logger = setup_logger(log_dir="logs", run_name=run_name)
+    logger = setup_logger(log_dir="logs", run_name=run_name, tz_name=args.timezone)
     main_instance.logger = logger
 
     # 记录完整运行参数
